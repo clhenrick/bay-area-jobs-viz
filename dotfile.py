@@ -43,7 +43,7 @@ def main(input_filename, wac_filename, output_filename):
 
     #Set up outfile as csv
     outf = open(output_filename,'w')
-    outf.write('x,y,sect,inctype,quadkey\n')
+    outf.write('x,y,lat,lon,sect,inctype,quadkey\n')
 
     # Create a GlobalMercator object for later conversions
 
@@ -152,6 +152,8 @@ def main(input_filename, wac_filename, output_filename):
                     if poly.contains(samplepoint):
                         break
 
+                lon = samplepoint.x
+                lat = samplepoint.y
                 x, y = merc.LatLonToMeters(samplepoint.y,samplepoint.x)
                 tx,ty = merc.MetersToTile(x, y, 21)
 
@@ -171,7 +173,7 @@ def main(input_filename, wac_filename, output_filename):
 
                 quadkey = merc.QuadTree(tx, ty, 21)
 
-                outf.write("%s,%s,%s,%s,%s\n" %(x,y,sect,inctype,quadkey))
+                outf.write("%s,%s,%s,%s,%s,%s,%s\n" %(x,y,lat,lon,sect,inctype,quadkey))
                 # Convert the longitude and latitude coordinates to meters and
                 # a tile reference
 
@@ -182,7 +184,7 @@ if __name__ == "__main__":
     # TODO: make these script arguments?
     wac_filename = "data/wac/ca_wac_S000_JT00_2002.csv"
     input_filename = "data/block_shp/census_blocks_2000_bay_area_4269.shp"
-    output_filename = "data/job_point/jobpoint_2012.csv"
+    output_filename = "data/job_point/jobpoint_2012_test2.csv"
 
     print(wac_filename, input_filename, output_filename)
 
