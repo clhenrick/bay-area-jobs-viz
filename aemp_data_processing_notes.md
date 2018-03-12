@@ -28,6 +28,8 @@ ogr2ogr \
   ~/data/census/blocks_2000/CA_block_2000.shp
 ```
 
+
+
 ## Dot File Generation
 First, install Miniconda and set up a Python virtual environment with dependencies.
 
@@ -53,6 +55,9 @@ conda install pip
 # install shapely, geos, gdal
 conda install shapely
 conda install gdal
+
+# install geopandas
+conda install -c conda-forge geopandas
 
 # to deactivate the virtual env
 source deactivate
