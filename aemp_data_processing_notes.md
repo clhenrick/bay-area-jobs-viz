@@ -2,15 +2,16 @@
 Census polygon data was downloaded from the US Census and IPUMS NHGIS. The data is in NAD83 CRS.
 
 ## Census 2010 Block Polygons
-Note this data CRS is NAD83 unprojected coordinate system
+Note the original data CRS is USA_Contiguous_Albers_Equal_Area_Conic (http://epsg.io/102003)
 
-Use `ogr2ogr` to select only the block groups for the 9 county bay area
+Use `ogr2ogr` to select only the block groups for the 9 county bay area and reproject it to NAD83
 
 ```bash
 ogr2ogr \
-  -sql "select * from tl_2010_06_tabblock10 where COUNTYFP10 IN ('001', '013', '041', '055', '075', '081', '085', '095', '097')" \
+  -sql "select GEOID10, TRACTCE10, BLOCKCE10 from CA_block_2010 where COUNTYFP10 IN ('001', '013', '041', '055', '075', '081', '085', '095', '097')" \
+  -t_srs EPSG:4269 \
   data/block_shp/census_blocks_2010_bay_area_4269.shp \
-  ~/data/census/blocks_2010/tl_2010_06_tabblock10.shp
+  ~/data/census/blocks_2010/CA_block_2010.shp
 ```
 
 ## Census 2000 Block Polygons
@@ -27,8 +28,6 @@ ogr2ogr \
   data/block_shp/census_blocks_2000_bay_area_4269.shp \
   ~/data/census/blocks_2000/CA_block_2000.shp
 ```
-
-
 
 ## Dot File Generation
 First, install Miniconda and set up a Python virtual environment with dependencies.
@@ -65,5 +64,9 @@ source deactivate
 
 ## Data Sources
 
-- Census 2010 block polygons, U.S. Census http://www2.census.gov/geo/tiger/TIGER2010/TABBLOCK/2010/tl_2010_06_tabblock10.zip
-- Census 2000 block polygons, IPUMS NHGIS, University of Minnesota, https://data2.nhgis.org/
+- Census 2000 & 2010 block polygons, IPUMS NHGIS, University of Minnesota, https://data2.nhgis.org/
+
+## Credits
+
+### Research using NHGIS data should cite it as:
+Steven Manson, Jonathan Schroeder, David Van Riper, and Steven Ruggles. IPUMS National Historical Geographic Information   System: Version 12.0 [Database]. Minneapolis: University of Minnesota. 2017. http://doi.org/10.18128/D050.V12.0
