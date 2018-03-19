@@ -1,9 +1,12 @@
-# this is a helpful resource: https://www.tutorialspoint.com/python_pandas/
+# exploring data processing using pandas and geopandas
+# FYI this is a helpful resource: https://www.tutorialspoint.com/python_pandas/
+# make sure to activate virtual environment prior to running this code, e.g.
+# `source activate jobs_map_env`
 
 # import the pandas library
 import pandas as pd
 
-# load data from csv
+# load census wac data from csv
 wac = pd.read_csv("/Users/chrishenrick/fun/aemp_jobs_viz/data/wac/ca_wac_S000_JT00_2002.csv", sep=",", delimiter=None, header="infer", names=None, index_col=None, usecols=None)
 
 # look at the table structure
@@ -52,12 +55,15 @@ blocks = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/block_shp/cen
 # look at what crs the blocks shapefile is in
 blocks.crs
 
-# create a new "geoid" column for the blocks shapes
+# create a new "geoid" column for the blocks shapes, dropping the preceeding zero
 blocks["geoid"] = blocks.GEOID10.str[1:]
 
-# merge our blocks to our census data
+# load processed census wac data
 jobs = pd.read_csv("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/jobs_2002.csv", dtype={"geoid": str})
+
+# merge (join) our blocks to our census data
 # left_on is the column for the blocks shapefile, right_on is the column for the csv data
+# on is when both columns share the same name
 blocks = blocks.merge(jobs, on="geoid")
 
 # reproject our data to EPSG:2227 (CA State Plane 3)
@@ -76,18 +82,28 @@ blocks.to_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/blocks_jobs_2002"
 ##### dissolve blocks to census tracks for a choropleth map
 # when doing the merge, do an left outer join to not lose shapes
 blocks = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/block_shp/census_blocks_2000_bay_area_4269.shp")
+jobs = pd.read_csv("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/jobs_2002.csv", dtype={"geoid": str})
 blocks["geoid"] = blocks.GEOID10.str[1:]
 blocks = blocks.merge(jobs, on="geoid", how="left")
 blocks = blocks.dissolve(by="TRACT2000", aggfunc="sum")
 
-# convert to state plane again
+# convert to state plane for calculating area correctly
 blocks = blocks.to_crs(epsg=2227)
 
-# store the area in a column, choropleth maps should really show rate (count / area)
+# store the area in a column as square meters
 blocks["area_sqm"] = (blocks.area * 0.09290304)
+
+# calculate rates for each group (choropleth maps should really show rate (count / area))
 blocks["makers"] = blocks.makers / blocks.area_sqm
 blocks["services"] = blocks.services / blocks.area_sqm
 blocks["professions"] = blocks.professions / blocks.area_sqm
 blocks["support"] = blocks.support / blocks.area_sqm
+
+# filter out census tracks that have all 0 values
+# though maybe it's better to leave all areas so the choropleth map doesn't look broken up?
+# blocks = blocks.loc[(blocks["makers"] > 0) & (blocks["services"] > 0) & (blocks["professions"] > 0) & (blocks["support"] > 0)]
+
+# project to WGS84 for ease of use with web visualization tools
+blocks = blocks.to_crs(epsg=4326)
 
 blocks.to_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/tracts_jobs_2002")
