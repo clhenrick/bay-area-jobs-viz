@@ -107,3 +107,35 @@ blocks["support"] = blocks.support / blocks.area_sqm
 blocks = blocks.to_crs(epsg=4326)
 
 blocks.to_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/tracts_jobs_2002")
+
+###############################################
+# One way to get around different census tract geographies from 2000 and 2010
+# is to convert the block shapes to centroids, then aggregate the centroids
+# to 2010 census tracts
+blocks2000 = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/block_shp/census_blocks_2000_bay_area_4269.shp")
+blocks2010 = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/block_shp/census_blocks_2010_bay_area_4269.shp")
+jobs = pd.read_csv("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/jobs_2002.csv", dtype={"geoid": str})
+
+# create a new geoid column that leaves off the first char so we can join to jobs
+blocks2000["geoid"] = blocks.GEOID10.str[1:]
+
+# copy blocks polygons to a new dataframe for creating census tracks
+tracts = blocks2010.copy()
+# dissovle to census tracts
+tracts = tracts.dissolve(by="TRACTCE10")
+# note: this didn't keep the TRACTCE10 column...
+
+# copy blocks polygons to a new dataframe
+centroids = blocks2000.copy()
+# update the geometry to be point centroid of the polygon
+centroids.geometry = centroids["geometry"].centroid
+# set the crs to the blocks poly crs
+centroids.crs = blocks.crs
+
+# join the data
+centroids = centroids.merge(jobs, on="geoid", how="left")
+# TODO: remove centroids that only have NaN values
+
+# TODO: iterate over centroids and tract polygons to sum each category in polygons
+# could take a subset of tracts by removing those with no points in them
+# prior to aggregation of points

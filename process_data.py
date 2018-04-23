@@ -100,4 +100,5 @@ if __name__ == "__main__":
     main(
         "/Users/chrishenrick/fun/aemp_jobs_viz/data/wac/ca_wac_S000_JT00_2002.csv",
         "/Users/chrishenrick/fun/aemp_jobs_viz/data/block_shp/census_blocks_2000_bay_area_4269.shp",
-        "/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/tracts_jobs_2002_test")
+        "/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/tracts_jobs_2002_test"
+    )
