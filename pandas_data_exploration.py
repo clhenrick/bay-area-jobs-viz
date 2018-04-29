@@ -1,4 +1,4 @@
-# exploring data processing using pandas and geopandas
+# exploring U.S. Census LEHD WAC data processing using Pandas and Geopandas
 # FYI this is a helpful resource: https://www.tutorialspoint.com/python_pandas/
 # make sure to activate virtual environment prior to running this code, e.g.
 # `source activate jobs_map_env`

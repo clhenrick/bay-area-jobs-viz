@@ -29,7 +29,21 @@ ogr2ogr \
   ~/data/census/blocks_2000/CA_block_2000.shp
 ```
 
-## Dot File Generation
+## Census 2016 Tract Polygons
+Similar to the above processing for block polygons, extract census tracts for the bay area for land only
+and reproject them to NAD83
+
+```bash
+ogr2ogr \
+  -sql "select TRACTCE, GEOID from US_tract_2016 where STATEFP = '06' AND ALAND > 0 AND COUNTYFP IN ('001', '013', '041', '055', '075', '081', '085', '095', '097')" \
+  -t_srs EPSG:4269 \
+  data/census_tracts/census_tracts_2016_bay_area_4269.shp \
+  ~/data/census_tracts/nhgis0003_shape/nhgis0003_shapefile_tl2016_us_tract_2016/US_tract_2016.shp
+```
+
+## Environment Setup
+For using Python Pandas and GeoPandas for data processing.
+
 First, install Miniconda and set up a Python virtual environment with dependencies.
 
 ```bash
@@ -65,6 +79,8 @@ source deactivate
 ## Data Sources
 
 - Census 2000 & 2010 block polygons, IPUMS NHGIS, University of Minnesota, https://data2.nhgis.org/
+
+- Census Longitudinal Employer-Household Dynamics Workplace Area Characteristics https://lehd.ces.census.gov/data/
 
 ## Credits
 
