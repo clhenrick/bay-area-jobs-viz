@@ -52,9 +52,9 @@ filtered = blocks[['TRACTCE10', 'makers', 'services', 'professions', 'support']]
 grouped = filtered.groupby('TRACTCE10', as_index=False)
 
 # view groups
-for name, group in grouped:
-    print name
-    print group
+# for name, group in grouped:
+#     print name
+#     print group
 
 # aggregate data by computing the sum for each category for each group
 aggregated = grouped.agg(np.sum)
@@ -83,19 +83,23 @@ aggregated['professions_pct'] = aggregated['professions'] / aggregated['total']
 aggregated['support_pct'] = aggregated['support'] / aggregated['total']
 
 # compute tract level location quotients
-aggregated['makers_lq'] = aggregated['makers_pct'] / makers_pct
-aggregated['services_lq'] = aggregated['services_pct'] / services_pct
-aggregated['professions_lq'] = aggregated['professions_pct'] / professions_pct
-aggregated['support_lq'] = aggregated['support_pct'] / support_pct
+# using shorthand for column names because of shapefile dbf field charcter count limit
+aggregated['make_lq'] = aggregated['makers_pct'] / makers_pct
+aggregated['serv_lq'] = aggregated['services_pct'] / services_pct
+aggregated['prof_lq'] = aggregated['professions_pct'] / professions_pct
+aggregated['supp_lq'] = aggregated['support_pct'] / support_pct
 
 # import 2016 census tract polygons
 tracts = gpd.read_file('/Users/chrishenrick/fun/aemp_jobs_viz/data/census_tracts/census_tracts_2016_bay_area_4269.shp')
+
+# reproject to wgs84
+tracts = tracts.to_crs(epsg=4326)
 
 # join aggregated data to tracts
 tracts = tracts.merge(aggregated, how='inner', left_on='TRACTCE', right_on='TRACTCE10')
 
 # filter out the temporary columns at this point to only grab the columns with the location quotients (*_lq)
-tracts = tracts[['TRACTCE', 'geometry', 'makers_lq', 'services_lq', 'professions_lq', 'support_lq']]
+tracts = tracts[['TRACTCE', 'geometry', 'make_lq', 'serv_lq', 'prof_lq', 'supp_lq']]
 
 # save file
-tracts.to_file('/Users/chrishenrick/fun/aemp_jobs_viz/data/census_tracts/tracts_2016_lq')
+tracts.to_file('/Users/chrishenrick/fun/aemp_jobs_viz/data/census_tracts/tracts_2016_lq_4326')
