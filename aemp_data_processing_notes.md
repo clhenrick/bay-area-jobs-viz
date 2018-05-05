@@ -41,6 +41,18 @@ ogr2ogr \
   ~/data/census_tracts/nhgis0003_shape/nhgis0003_shapefile_tl2016_us_tract_2016/US_tract_2016.shp
 ```
 
+## TopoJSON Creation
+To create topojson for rendering with D3
+
+```bash
+mapshaper \
+  -i data/census_tracts/tracts_2016_lq_4326/tracts_2016_lq_4326.shp \
+  -simplify 10% \
+  -o data/census_tracts/tracts_2016_lq_4326/tracts_2016_lq_4326.json \
+  force \
+  format=topojson
+```
+
 ## Environment Setup
 For using Python Pandas and GeoPandas for data processing.
 
