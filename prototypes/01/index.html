@@ -1,10 +1,5 @@
 <!DOCTYPE html>
 <style>
-  .features {
-    fill: none;
-    stroke: #888;
-    stroke-width: 0.3px;
-  }
   select {
     float: right;
     margin-bottom: 20px;
@@ -110,16 +105,30 @@
 
     // render geojson paths
     function renderFeatures(category) {
-      const features = group.selectAll("path")
+      const features = group.selectAll("path.features")
         .data(geojson.features)
 
       features.enter()
         .append("path")
         .merge(features)
+        .classed("features", true)
         .attr("d", path)
         .attr("fill", d => color(d.properties[category]))
+        .append("title")
+        .text(d => d.properties[category])
 
       features.exit().remove()
+    }
+
+    function renderBorders() {
+      group.append("path")
+        .datum(topojson.mesh(data, data.objects.tracts_2016_lq_4326))
+        .classed("borders", true)
+        .attr("fill", "none")
+        .attr("stroke-width", 0.05)
+        .attr("stroke", "#888")
+        .attr("stroke-linejoin", "round")
+        .attr("d", path);
     }
 
     // set domain of color scale using current category from dropdown
@@ -128,11 +137,22 @@
       color.domain([extent[0], 1, extent[1]])
     }
 
+    // TODO: create the legend...
+    function renderLegend() {
+      const legendGroup = svg.append('g')
+        .attr("transform", `translate(${width - 100}, ${height - 50})`)
+
+      legendGroup.selectAll("rect")
+        .data()
+    }
+
     // register events
     dispatcher.on("change.color", updateColorScaleDomain)
     dispatcher.on("change.features", renderFeatures)
+
     // call initial render
     dispatcher.call("change", this, defaultCategory)
+    renderBorders()
   }
 
   renderDropdown()
