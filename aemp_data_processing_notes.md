@@ -53,6 +53,15 @@ mapshaper \
   format=topojson
 ```
 
+## CSV Creation
+A CSV can be created from any of the processed shapefiles' DBF by simply doing:
+
+```bash
+mapshaper \
+  -i data/tracts_processed_lq/tracts_lq_2002/tracts_lq_2002.dbf \
+  -o data/tracts_processed_lq/tracts_lq_2002/tracts_lq_2002.csv
+```
+
 ## Environment Setup
 For using Python Pandas and GeoPandas for data processing.
 
