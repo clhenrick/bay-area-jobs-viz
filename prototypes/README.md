@@ -11,6 +11,8 @@ To view examples run an HTTP server in the root of this repo. Note it assumes da
 
 - [04: Number Line for Change in LQ 2002 - 2015](./04)
 
+- [05: Beeswarm Plot for Change in LQ 2002 - 2015](./05)
+
 ## TO DO:
 
 - [ ] Legends for maps
