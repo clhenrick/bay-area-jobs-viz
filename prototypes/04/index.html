@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<style>
+  select {
+    float: right;
+    margin-bottom: 20px;
+  }
+</style>
+<body></body>
+<script src="../vendor/d3.js"></script>
+<script src="../vendor/topojson.js"></script>
+<script src="../vendor/d3-scale-chromatic.js"></script>
+<script>
+  const margin = { top: 10, bottom: 30, right: 10, left: 10 }
+  const width = 750 - margin.left - margin.right
+  const height = 50 - margin.top - margin.bottom
+  const defaultCategory = "prof_c" // current selected category from dropdown element
+  const categories = [
+    {
+      label: "change in makers",
+      value: "make_c"
+    },
+    {
+      label: "change in services",
+      value: "serv_c"
+    },
+    {
+      label: "change in professions",
+      value: "prof_c"
+    },
+    {
+      label: "change in support",
+      value: "supp_c"
+    }
+  ]
+  const dispatcher = d3.dispatch("change")
+
+
+  function renderDropdown() {
+    dropdown = d3.select("body")
+      .append("select")
+
+    const options = dropdown.selectAll("options")
+      .data(categories)
+      .enter()
+      .append("option")
+      .attr("value", d => d.value)
+      .html(d => d.label)
+
+    options.each(function(option) {
+      const selection = d3.select(this)
+      selection.datum(option)
+
+      if (option.value === defaultCategory) {
+        selection.attr("selected", true)
+      }
+    })
+
+    dropdown.on("change", function() {
+      const value = d3.select(this).property("value")
+      dispatcher.call("change", this, value)
+    })
+  }
+
+  // first render the dropdown UI
+  renderDropdown()
+
+  // load csv data async to join on tracts topology, this way we can load data for any year...
+  d3.csv("../../data/tmp/lq_change_2015_2012/lq_change_2015_2012.csv", function(error, data) {
+    if (error) throw error;
+    console.log(data)
+
+    const xScale = d3.scaleLinear()
+      .range([0, width])
+
+    const xAxis = d3.axisBottom(xScale)
+
+    const svg = d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+
+    const g = svg.append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`)
+
+    g.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", `translate(0, ${height})`)
+      .call(xAxis)
+
+    g.append("g")
+      .attr("class", "circles")
+
+    function updateXScale(category) {
+      xScale.domain(d3.extent(data, d => Number(d[category])))
+      console.log(xScale.domain())
+    }
+
+    function updateXAxis() {
+      g.select("g.axis.axis--x")
+        .call(xAxis)
+    }
+
+    function updateCircles(category) {
+      const circles = g.select("g.circles")
+        .selectAll("circle")
+        .data(data.map(d => Number(d[category])))
+
+      circles.enter()
+        .append("circle")
+        .merge(circles)
+        .attr("cx", d => xScale(d))
+        .attr("cy", 0)
+        .attr("r", 3)
+        .attr("fill", "#333")
+
+      circles.exit().remove()
+    }
+
+    dispatcher.on("change.scale", updateXScale)
+    dispatcher.on("change.axis", updateXAxis)
+    dispatcher.on("change.circles", updateCircles)
+    dispatcher.call("change", this, defaultCategory)
+  })
+</script>
