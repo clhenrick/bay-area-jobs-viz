@@ -13,6 +13,8 @@ To view examples run an HTTP server in the root of this repo. Note it assumes da
 
 - [05: Beeswarm Plot for Change in LQ 2002 - 2015](./05)
 
+- [06: Non-Contiguous Cartogram (Change in LQ and 2015 LQ)](./06)
+
 ## TO DO:
 
 - [ ] Legends for maps
