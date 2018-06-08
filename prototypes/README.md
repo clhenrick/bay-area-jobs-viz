@@ -17,6 +17,8 @@ To view examples run an HTTP server in the root of this repo. Note it assumes da
 
 - [07: Like 6 but using d3.scaleCluster for color values](./07)
 
+- [08: Change in LQ 2002 – 2015 de-emphasizing areas with low job counts](./08)
+
 ## TO DO:
 
 - [ ] Legends for maps
