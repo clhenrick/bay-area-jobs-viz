@@ -88,6 +88,7 @@
 
     const color = d3.scaleLinear()
       .range(d3.schemeRdYlBu[3])
+      .interpolate(d3.interpolateHcl)
 
     const opacity = d3.scaleLinear()
       .range([0.1, 1])
@@ -135,10 +136,11 @@
       const features = group.selectAll("path.features")
         .data(geojson.features, d => d.properties.TRACTCE10)
 
-      const fupdate = features.enter()
+      features.enter()
         .append("path")
         .merge(features)
         .classed("features", true)
+        .transition().duration(1750)
         .attr("d", path)
         .attr("fill", d => color(lqChange(d)))
         .attr("transform", d => {
