@@ -6,7 +6,7 @@ import sys
 
 def process_wac(wac):
     """
-    Takes an input wac dataframe, processes data, returns a new dataframe
+    Takes an input wac dataframe, aggregates categories, returns a new dataframe
     """
     print "processing wac data..."
 
@@ -34,7 +34,7 @@ def join_wac_to_blocks(blocks, wac_df):
     """
     print "processing blocks shp data..."
 
-    # create a new "geoid" column for the blocks shapes, dropping the preceeding zero
+    # create a new "geoid" column for the blocks shapes, dropping the leading zero
     blocks["geoid"] = blocks.GEOID10.str[1:]
 
     # cast the blocks geoid data type to numeric so it can be joined with the df
@@ -99,14 +99,26 @@ def process_tracts(lq_df, tracts_df):
     """
     print "joining location quotient df to tracts df..."
 
-    # reproject tracts to wgs84
-    tracts_df = tracts_df.to_crs(epsg=4326)
-
     # join aggregated data to tracts
     tracts_df = tracts_df.merge(lq_df, how='inner', left_on='TRACTCE', right_on='TRACTCE10')
 
+    # reproject tracts to california state plane 3
+    tracts_df = tracts_df.to_crs(epsg=2227)
+
+    # store the area in a column as square meters
+    tracts_df["area_sqm"] = (tracts_df.area * 0.09290304)
+
+    # calculate number of jobs per sqm for each group
+    tracts_df["make_sqm"] = tracts_df.makers / tracts_df.area_sqm
+    tracts_df["serv_sqm"] = tracts_df.services / tracts_df.area_sqm
+    tracts_df["prof_sqm"] = tracts_df.professions / tracts_df.area_sqm
+    tracts_df["supp_sqm"] = tracts_df.support / tracts_df.area_sqm
+
+    # reproject tracts to wgs84
+    tracts_df = tracts_df.to_crs(epsg=4326)
+
     # filter out the temporary columns
-    tracts_df = tracts_df[['TRACTCE', 'geometry', 'make_lq', 'serv_lq', 'prof_lq', 'supp_lq']]
+    tracts_df = tracts_df[['TRACTCE', 'geometry', 'make_lq', 'make_sqm', 'serv_lq', 'serv_sqm', 'prof_lq', 'prof_sqm', 'supp_lq', 'supp_sqm',]]
 
     return tracts_df
 
@@ -138,7 +150,7 @@ def main(wac_file, blocks_shp, tracts_shp, out_file):
         print("could not read %s" % tracts_shp)
         sys.exit()
 
-    # group wac categories into
+    # aggregat wac categories into
     wac_new = process_wac(wac_df)
 
     # join the wac data to census blocks geography & aggregate to tract level
@@ -162,8 +174,8 @@ if __name__ == "__main__":
     # - test that they exist before acting on them
     # - print usage instructions
     main(
-        "/Users/chrishenrick/fun/aemp_jobs_viz/data/wac/ca_wac_S000_JT00_2002.csv",
+        "/Users/chrishenrick/fun/aemp_jobs_viz/data/wac/ca_wac_S000_JT00_2015.csv",
         "/Users/chrishenrick/fun/aemp_jobs_viz/data/block_shp/census_blocks_2010_bay_area_4269.shp",
         "/Users/chrishenrick/fun/aemp_jobs_viz/data/census_tracts/census_tracts_2016_bay_area_4269.shp",
-        "/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/process_data_tracts_lq_2002_test"
+        "/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/process_data_tracts_lq_2015_test2"
     )
