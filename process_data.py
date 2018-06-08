@@ -91,6 +91,12 @@ def calc_location_quotient(df):
     df['prof_lq'] = df['professions_pct'] / professions_pct
     df['supp_lq'] = df['support_pct'] / support_pct
 
+    # calculate deciles for number of jobs per tract, so we can ignore tracts with few jobs
+    df['make_dec'] = pd.qcut(df['makers'], 10, labels=False)
+    df['serv_dec'] = pd.qcut(df['services'], 10, labels=False)
+    df['prof_dec'] = pd.qcut(df['professions'], 10, labels=False)
+    df['supp_dec'] = pd.qcut(df['support'], 10, labels=False)
+
     return df
 
 def process_tracts(lq_df, tracts_df):
@@ -118,7 +124,7 @@ def process_tracts(lq_df, tracts_df):
     tracts_df = tracts_df.to_crs(epsg=4326)
 
     # filter out the temporary columns
-    tracts_df = tracts_df[['TRACTCE', 'geometry', 'make_lq', 'make_sqm', 'serv_lq', 'serv_sqm', 'prof_lq', 'prof_sqm', 'supp_lq', 'supp_sqm',]]
+    tracts_df = tracts_df[['TRACTCE', 'geometry', 'make_lq', 'make_sqm', 'make_dec', 'serv_lq', 'serv_sqm', 'serv_dec', 'prof_lq', 'prof_sqm', 'prof_dec', 'supp_lq', 'supp_sqm', 'supp_dec']]
 
     return tracts_df
 
