@@ -15,6 +15,8 @@ To view examples run an HTTP server in the root of this repo. Note it assumes da
 
 - [06: Non-Contiguous Cartogram (Change in LQ and 2015 LQ)](./06)
 
+- [07: Like 6 but using d3.scaleCluster for color values](./07)
+
 ## TO DO:
 
 - [ ] Legends for maps
