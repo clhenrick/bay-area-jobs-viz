@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<style>
+  .opacity-toggle,
+  .blend-mode,
+  .bg-color-slider,
+  select {
+    float: right;
+    margin-bottom: 20px;
+  }
+
+  .opacity-toggle,
+  .blend-mode,
+  .bg-color-slider {
+    margin-right: 20px;
+  }
+</style>
+<body></body>
+<script src="../vendor/d3.js"></script>
+<script src="../vendor/topojson.js"></script>
+<script src="../vendor/d3-scale-chromatic.js"></script>
+<script src="https://unpkg.com/d3-scale-cluster@1.3.1/dist/d3-scale-cluster.min.js"></script>
+<script>
+  // NOTES:
+  // There are a few ways of de-emphasizing tracts that have fewer job counts in them
+  // - use the decile of total number of jobs by category per tract
+  // - use the number of jobs by category / square meter
+  // Then, the following techniques can be used:
+  // - filter out tracts from data before calculating scales
+  // - reduce opacity of tracts with fewer jobs
+
+  const width = 750
+  const height = 750
+
+  const numberOfClusters = 5
+
+  const bgColor = "hsl(0,0%,98%)" // "hsl(0, 0%, 98%)"
+  let borderColor = "hsl(0,0%,10%)" // "hsl(0,0%,70%)"
+  let blendMode = "multiply"
+  let opacityChange = true
+
+  const defaultCategory = "prof" // current selected category from dropdown element
+  const categories = [
+    {
+      label: "makers",
+      value: "make"
+    },
+    {
+      label: "services",
+      value: "serv"
+    },
+    {
+      label: "professions",
+      value: "prof"
+    },
+    {
+      label: "support",
+      value: "supp"
+    }
+  ]
+  const dispatcher = d3.dispatch("change")
+
+
+  function renderDropdown() {
+    dropdown = d3.select("body")
+      .append("select")
+
+    const options = dropdown.selectAll("options")
+      .data(categories)
+      .enter()
+      .append("option")
+      .attr("value", d => d.value)
+      .html(d => d.label)
+
+    options.each(function(option) {
+      const selection = d3.select(this)
+      selection.datum(option)
+
+      if (option.value === defaultCategory) {
+        selection.attr("selected", true)
+      }
+    })
+
+    dropdown.on("change", function() {
+      const value = d3.select(this).property("value")
+      dispatcher.call("change", this, value)
+    })
+  }
+
+  function renderSlider() {
+    const min = 0, max = 100, step = 0.1
+    const colorScale = d3.scaleLinear()
+      .range(["hsl(0,0%,20%)", "#fff"])
+      .domain([min, max])
+
+    const colorScale2 = colorScale.copy()
+      .range(["#fff", "hsl(0,0%,30%)"])
+
+    const slider = d3.select("body")
+      .append("input")
+      .classed("bg-color-slider", true)
+      .attr("type", "range")
+      .attr("width", 300)
+      .attr("min", min)
+      .attr("max", max)
+      .attr("step", step)
+      .attr("value", max)
+      .on("input", function() {
+        const el = d3.select(this)
+        const value = el.property("value")
+
+        borderColor = colorScale2(value)
+
+        d3.select("svg > rect.background")
+          .attr("fill", colorScale(value))
+
+        d3.select("path.borders")
+          .attr("stroke", borderColor)
+      })
+  }
+
+  function renderInput() {
+    const input = d3.select("body")
+      .append("input")
+      .classed("blend-mode", true)
+      .attr("type", "text")
+      .attr("width", 250)
+      .attr("value", blendMode)
+      .on("change", function() {
+        const el = d3.select(this)
+        const value = el.property("value")
+
+        blendMode = value
+
+        d3.selectAll("path.features")
+          .style("mix-blend-mode", blendMode)
+      })
+  }
+
+  function renderCheckBox() {
+    const checkbox = d3.select("body")
+      .append("input")
+      .classed("opacity-toggle", true)
+      .attr("type", "checkbox")
+      .property("checked", opacityChange)
+      .on("change", function() {
+        const el = d3.select(this)
+        const value = el.property("checked")
+        console.log(value)
+        opacityChange = value
+        d3.selectAll("path.features")
+          // FIXME
+          // .attr("opacity", d => opacityChange ? opacity(+decile(d)) : 1)
+      })
+  }
+
+
+  function main (lq, topology) {
+    const geojson = topojson.feature(topology, topology.objects.census_tracts_2016_bay_area_4326)
+    console.log(geojson, geojson.features[0].properties)
+    console.log(lq)
+
+    // store location quotient data in a hash map to look up values later
+    const lookup = d3.map()
+    lq.forEach(row => lookup.set(row.TRACTCE, row))
+
+    const format = d3.format(".5f")
+
+    const accessor = category => d => {
+      const value = lookup.get(d.properties.TRACTCE)
+      // if (!value) console.log(d.properties.TRACTCE) // a few tracts didn't join...
+      return value ? +value[category] : undefined
+    }
+
+    // california state plane 3: https://github.com/veltman/d3-stateplane
+    const projection = d3.geoConicConformal()
+      .parallels([37 + 4 / 60, 38 + 26 / 60])
+      .rotate([120 + 30 / 60], 0)
+      .fitSize([width, height], geojson)
+
+    const path = d3.geoPath().projection(projection)
+
+    const color = d3.scaleCluster()
+
+    const opacity = d3.scaleLinear()
+      .range([0.1, 1])
+      .domain([0, 9])
+
+    const area = d3.scaleSqrt()
+      .range([0.1, 1])
+
+    const zoomed = () => {
+      group.attr("transform", d3.event.transform)
+    }
+
+    const zoom = d3.zoom()
+      .scaleExtent([1, 20])
+      .translateExtent([[0, 0], [width, height]])
+      .on("zoom", zoomed)
+
+    const svg = d3.select("body")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+
+    svg.append("rect")
+      .classed("background", true)
+      .attr("width", width)
+      .attr("height", height)
+      .attr("fill", bgColor)
+
+    const group = svg
+      .append("g")
+      .classed("features", true)
+
+    group.call(zoom)
+
+    svg.append("rect")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("fill", "none")
+      .attr("stroke", "#333")
+      .attr("stroke-width", 1)
+
+    // render geojson paths
+    function renderFeatures(category) {
+      const lq2015 = accessor(`${category}_15`)
+      const lqChange = accessor(`${category}_c`)
+      const decile = accessor(`${category}_dec`)
+
+      const features = group.selectAll("path.features")
+        .data(geojson.features, d => d.properties.TRACTCE10)
+
+      features.enter()
+        .append("path")
+        .merge(features)
+        .classed("features", true)
+        .transition().duration(1750)
+        .attr("d", path)
+        .attr("fill", d => lqChange(d) ? color(lqChange(d)) : "#eee")
+        .attr("opacity", d => opacityChange ? opacity(+decile(d)) : 1)
+        .style("mix-blend-mode", blendMode)
+        .attr("transform", d => {
+          const centroid = path.centroid(d)
+          const x = centroid[0]
+          const y = centroid[1]
+          return `translate(${x}, ${y}) scale(${area(lq2015(d)) || 0}) translate(${-x}, ${-y})`
+        })
+        .each(function(d) {
+          const path = d3.select(this)
+          let title = path.select("title")
+          if (!title.node()) {
+            title = path.append("title")
+          }
+          title.text(
+            `change: ${format(lqChange(d))}, lq: ${format(lq2015(d))}, decile: ${decile(d)}`
+          )
+        })
+
+      features.exit().remove()
+    }
+
+    function renderBorders() {
+      // remove and re-draw the borders on each render so that they're always above the filled polygons
+      group.selectAll("path.borders").remove()
+
+      group.append("path")
+        .datum(topojson.mesh(topology, topology.objects.census_tracts_2016_bay_area_4326))
+        .classed("borders", true)
+        .attr("fill", "none")
+        .attr("stroke-width", 0.05)
+        .attr("stroke", borderColor)
+        .attr("stroke-linejoin", "round")
+        .attr("d", path);
+    }
+
+    // set domain of color scale using current category from dropdown
+    function updateColorScaleDomain(category) {
+      color.domain(lookup.entries().map(d => +d.value[`${category}_c`]))
+        .range(d3.schemeRdYlBu[numberOfClusters])
+      console.log("color clusters: ", color.clusters())
+    }
+
+    // not currently being used, opacity is set using decile group
+    function updateOpacityScaleDomain(category) {
+      const extent = d3.extent(lookup.entries(), d => +d.value[`${category}_sqm`])
+      opacity.domain(extent)
+    }
+
+    function updateAreaScaleDomain(category) {
+      const extent = d3.extent(lookup.entries(), d => +d.value[`${category}_15`] || 0)
+      area.domain([extent[0], 1])
+    }
+
+    // TODO: create the legend...
+    function renderLegend() {
+      const legendGroup = svg.append('g')
+        .attr("transform", `translate(${width - 100}, ${height - 50})`)
+
+      legendGroup.selectAll("rect")
+        .data()
+    }
+
+    // register events
+    dispatcher.on("change.color", updateColorScaleDomain)
+    dispatcher.on("change.opacity", updateOpacityScaleDomain)
+    dispatcher.on("change.area", updateAreaScaleDomain)
+    dispatcher.on("change.features", renderFeatures)
+    dispatcher.on("change.borders", renderBorders)
+
+    // call initial render
+    dispatcher.call("change", this, defaultCategory)
+    renderBorders()
+  }
+
+  // first render the UI
+  renderDropdown()
+  renderSlider()
+  renderInput()
+  renderCheckBox()
+
+  // load csv data async to join on tracts topology, this way we can load data for any year...
+  d3.csv("../../data/tmp/lq_2015_2012_area/lq_2015_2012_area.csv", function(error, lq) {
+    if (error) throw error;
+
+    // fitler data to only map top decile of number of jobs within a census tract?
+    // lq = lq.filter(d => +d.total_deci > 8)
+
+    d3.json("../../data/census_tracts/census_tracts_2016_bay_area_4326.json", function(error, topology) {
+      if (error) throw error;
+      main(lq, topology);
+    })
+  })
+</script>

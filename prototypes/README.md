@@ -19,6 +19,10 @@ To view examples run an HTTP server in the root of this repo. Note it assumes da
 
 - [08: Change in LQ 2002 – 2015 de-emphasizing areas with low job counts](./08)
 
+- [09: Combining elements of 08 and 07](./09)
+
+- [10: Getting experimental with 09: mix-blend-mode & oversizing tracts](./10)
+
 ## TO DO:
 
 - [ ] Legends for maps
