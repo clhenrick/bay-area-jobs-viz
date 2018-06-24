@@ -9,7 +9,7 @@ import numpy as np
 # wac2002 = pd.read_csv("/Users/chrishenrick/fun/aemp_jobs_viz/data/wac/ca_wac_S000_JT00_2002.csv", sep=",", delimiter=None, header="infer", names=None, index_col=None, usecols=None)
 
 # load 2015 census wac data
-wac = pd.read_csv("/Users/chrishenrick/fun/aemp_jobs_viz/data/wac/ca_wac_S000_JT00_2015.csv", sep=",", delimiter=None, header="infer", names=None, index_col=None, usecols=None)
+wac = pd.read_csv("/Users/chrishenrick/fun/aemp_jobs_viz/data/wac/ca_wac_S000_JT00_2002.csv", sep=",", delimiter=None, header="infer", names=None, index_col=None, usecols=None)
 
 # rename geo id column
 wac["geoid"] = wac["w_geocode"]
@@ -76,19 +76,21 @@ tracts = tracts.to_crs(epsg=4326)
 # compute the quintiles for job density
 tracts['quintile'] = pd.qcut(tracts["density"], 5, labels=False)
 
-# filter out tracts that are in the top quintile
-top_quintile = tracts.loc[tracts['quintile'] == 4]
 
+### this didn't work so well...
+# filter out tracts that are in the top quintile
+#top_quintile = tracts.loc[tracts['quintile'] == 4]
 
 # dissolve the filtered tracts by the quintile into their own "regions"
-dissolved = top_quintile.dissolve(by='quintile', aggfunc='sum')
+# dissolved = top_quintile.dissolve(by='quintile', aggfunc='sum')
+#######
 
 
 # store totals for each category, these will be the total jobs by category for the entire bay area
-makers_total = dissolved['makers'].sum()
-services_total = dissolved['services'].sum()
-professions_total = dissolved['professions'].sum()
-support_total = dissolved['support'].sum()
+makers_total = tracts['makers'].sum()
+services_total = tracts['services'].sum()
+professions_total = tracts['professions'].sum()
+support_total = tracts['support'].sum()
 all_total = makers_total + services_total + professions_total + support_total * 1.0
 
 # calculate percentages for each category, these will be used for determining the location quotients later
@@ -99,20 +101,20 @@ support_pct = support_total / all_total
 
 # repeat for the tract level
 # percentages
-dissolved['makers_pct'] = dissolved['makers'] / dissolved['total']
-dissolved['services_pct'] = dissolved['services'] / dissolved['total']
-dissolved['professions_pct'] = dissolved['professions'] / dissolved['total']
-dissolved['support_pct'] = dissolved['support'] / dissolved['total']
+tracts['makers_pct'] = tracts['makers'] / tracts['total']
+tracts['services_pct'] = tracts['services'] / tracts['total']
+tracts['professions_pct'] = tracts['professions'] / tracts['total']
+tracts['support_pct'] = tracts['support'] / tracts['total']
 
 # compute tract level location quotients
 # using shorthand for column names because of shapefile dbf field charcter count limit
-dissolved['make_lq'] = dissolved['makers_pct'] / makers_pct
-dissolved['serv_lq'] = dissolved['services_pct'] / services_pct
-dissolved['prof_lq'] = dissolved['professions_pct'] / professions_pct
-dissolved['supp_lq'] = dissolved['support_pct'] / support_pct
+tracts['make_lq'] = tracts['makers_pct'] / makers_pct
+tracts['serv_lq'] = tracts['services_pct'] / services_pct
+tracts['prof_lq'] = tracts['professions_pct'] / professions_pct
+tracts['supp_lq'] = tracts['support_pct'] / support_pct
 
 # create the final dataframe with only the values we need
-final = dissolved[['make_lq', 'serv_lq', 'prof_lq', 'supp_lq', 'geometry']]
+final = tracts[['make_lq', 'serv_lq', 'prof_lq', 'supp_lq', 'quintile', 'geometry']]
 
 # save output shapefile
-final.to_file('/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/density_quintile_dissolve_lq')
+final.to_file('/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/density_quintile_dissolve_lq2_2002')
