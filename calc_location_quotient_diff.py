@@ -5,8 +5,8 @@ import geopandas as gpd
 import numpy as np
 import sys
 
-lq_2002 = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/process_data_tracts_lq_2002_test")
-lq_2015 = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/process_data_tracts_lq_2015_test")
+lq_2002 = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/process_data_tracts_lq_2002_test2")
+lq_2015 = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/process_data_tracts_lq_2015_test2")
 
 df = lq_2015.copy()
 
@@ -31,12 +31,8 @@ del df['serv_lq']
 del df['prof_lq']
 del df['supp_lq']
 
-# calculate area using CA State Plane (ft)
-df = df.to_crs(epsg=2227)
-df['area_sqm'] = (df.area * 0.09290304)
-
 # df = df[['make_c', 'serv_c', 'prof_c', 'supp_c', 'geometry', 'TRACTCE']]
 
-df.to_file('/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/lq_2015_2012')
+df.to_file('/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/lq_2015_2012_area')
 
 # TODO: SF Bay Area change
