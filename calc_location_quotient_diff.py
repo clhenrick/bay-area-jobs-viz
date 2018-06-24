@@ -5,8 +5,8 @@ import geopandas as gpd
 import numpy as np
 import sys
 
-lq_2002 = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/process_data_tracts_lq_2002_test2")
-lq_2015 = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/process_data_tracts_lq_2015_test2")
+lq_2002 = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/density_quintile_dissolve_lq2_2002")
+lq_2015 = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/density_quintile_dissolve_lq2_2015")
 
 df = lq_2015.copy()
 
@@ -33,6 +33,6 @@ del df['supp_lq']
 
 # df = df[['make_c', 'serv_c', 'prof_c', 'supp_c', 'geometry', 'TRACTCE']]
 
-df.to_file('/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/lq_2015_2012_area')
+df.to_file('/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/lq_2015_2012_quintiles')
 
 # TODO: SF Bay Area change
