@@ -97,6 +97,11 @@ conda install -c conda-forge geopandas
 source deactivate
 ```
 
+## Location Quotient Analysis
+A _Location Quotient_ is an economic geographic analysis showing the ratio of a variable within a local area compared to its corresponding region. For this job categories analysis it means comparing the regional ratio of each of the super categories (Manufacturing and Logistics, Professional Services, Healthcare, Education, and Government, Retail, Hospitality, and Other Services) to the census tract ratio. So for example if a census tract has a value close to 1, then it is about the same as the region while greater then the region indicates a higher concentration of that category and a number less then one means a lower concentration.
+
+To compute the LQ for the census tracts in the SF Bay Area, I tried numerous approaches as shown in the `location_quotient_processing` scripts. One problem is that it's tricky to create a map that can be viewed at the regional level, due to the smaller geographic size of tracts in San Francisco. To highlight these tracts I calculated job density (number of total jobs divided by area) and then assigned each tract a quintile based on the density values. The top quintile of job density helps inform what areas to highlight in a map, as the LQ and change in LQ from 2002 – 2015, obscures job density.
+
 ## Data Sources
 
 - Census 2000 & 2010 block polygons, IPUMS NHGIS, University of Minnesota, https://data2.nhgis.org/
