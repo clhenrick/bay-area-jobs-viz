@@ -41,6 +41,18 @@ ogr2ogr \
   ~/data/census_tracts/nhgis0003_shape/nhgis0003_shapefile_tl2016_us_tract_2016/US_tract_2016.shp
 ```
 
+## Census 2010 Tract Polygons
+Similar to the above processing for block polygons, extract census tracts for the bay area for land only
+and reproject them to WGS84
+
+```bash
+ogr2ogr \
+  -sql "select GEOID10, TRACTCE10 from US_tract_2010 where STATEFP10 = '06' AND ALAND10 > 0 AND COUNTYFP10 IN ('001', '013', '041', '055', '075', '081', '085', '095', '097')" \
+  -t_srs EPSG:4326 \
+  data/census_tracts/tracts_2010_4326.shp \
+  /Users/chrishenrick/data/census/tracts_2010/US_tract_2010.shp
+```
+
 ## TopoJSON Creation
 To create topojson for rendering with D3
 
