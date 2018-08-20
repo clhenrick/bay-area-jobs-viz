@@ -12,3 +12,4 @@ https://lehd.ces.census.gov/data/lodes/LODES7/ca/wac/ca_wac_S000_JT00_2012.csv.g
 https://lehd.ces.census.gov/data/lodes/LODES7/ca/wac/ca_wac_S000_JT00_2013.csv.gz
 https://lehd.ces.census.gov/data/lodes/LODES7/ca/wac/ca_wac_S000_JT00_2014.csv.gz
 https://lehd.ces.census.gov/data/lodes/LODES7/ca/wac/ca_wac_S000_JT00_2015.csv.gz
+https://lehd.ces.census.gov/data/lodes/LODES7/ca/ca_xwalk.csv.gz
