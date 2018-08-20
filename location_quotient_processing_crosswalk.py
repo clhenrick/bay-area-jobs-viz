@@ -6,11 +6,13 @@
 import pandas as pd
 import geopandas as gpd
 import numpy as np
-import sys
+import sys, os
 
-wac2015 = pd.read_csv("/Users/chrishenrick/fun/aemp_jobs_viz/data/wac/ca_wac_S000_JT00_2015.csv", sep=",", delimiter=None, header="infer", names=None, index_col=None, usecols=None)
-wac2002 = pd.read_csv("/Users/chrishenrick/fun/aemp_jobs_viz/data/wac/ca_wac_S000_JT00_2002.csv", sep=",", delimiter=None, header="infer", names=None, index_col=None, usecols=None)
-cxwalk = pd.read_csv("/Users/chrishenrick/data/census/lehd/ca_xwalk.csv")
+dirname = os.path.dirname(__file__)
+
+wac2015 = pd.read_csv(os.path.join(dirname, "data/wac/ca_wac_S000_JT00_2015.csv"), sep=",", delimiter=None, header="infer", names=None, index_col=None, usecols=None)
+wac2002 = pd.read_csv(os.path.join(dirname, "data/wac/ca_wac_S000_JT00_2002.csv"), sep=",", delimiter=None, header="infer", names=None, index_col=None, usecols=None)
+cxwalk = pd.read_csv(os.path.join(dirname, "data/wac/ca_xwalk.csv"), sep=",", delimiter=None, header="infer", names=None, index_col=None, usecols=None, encoding = "ISO-8859-1") # encoding needed for this file with Python 3
 
 # filter crosswalk table by 9 counties of SF Bay Area
 cty_fips_list = [6001, 6013, 6041, 6055, 6075, 6081, 6085, 6095, 6097]
@@ -60,20 +62,20 @@ wac['supp_lq'] = wac['support'] / wac['total'] / support_pct
 
 # columns to keep for output csv
 columns = ['trct', 'make_lq', 'serv_lq', 'prof_lq', 'supp_lq']
-outfile = '/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/wac2015_rollup_no_geo_test.csv'
+outfile = os.path.join(dirname, 'data/tmp/wac2015_rollup_no_geo_test.csv')
 
 # write output csv
 wac.to_csv(outfile, columns=columns, index=False, encoding="utf-8")
 
 # process 2010 tracts geographies
-tracts = gpd.read_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/census_tracts/tracts_2010_4326.shp")
+tracts = gpd.read_file(os.path.join(dirname, "data/census_tracts/tracts_2010_4326.shp"))
 tracts["geoid"] = tracts["GEOID10"].str[1:]
 tracts[["geoid"]] = tracts[["geoid"]].apply(pd.to_numeric)
 tracts = tracts.merge(wac, how="inner", left_on="geoid", right_on="trct")
 
 # NOTE: for some reason the custom "geoid" field is corrupted in the output shapefile, so using GEOID10 here instead
 tracts = tracts[['GEOID10', 'make_lq', 'prof_lq', 'serv_lq', 'supp_lq', 'geometry']]
-test.to_file("/Users/chrishenrick/fun/aemp_jobs_viz/data/tmp/tracts_2010_lq_2015")
+tracts.to_file(os.path.join(dirname, "data/tmp/tracts_2010_lq_2015"))
 
 # good news is that it appears all 1580 rows successfully joined from the census tracts and wac data
 # and there are no tracts that have null values or lack data!
