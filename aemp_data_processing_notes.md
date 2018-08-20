@@ -81,10 +81,10 @@ First, install Miniconda and set up a Python virtual environment with dependenci
 
 ```bash
 # install miniconda, for more see: https://pandas.pydata.org/pandas-docs/stable/install.html
-bash Miniconda2-latest-MacOSX-x86_64.sh
+bash Miniconda3-latest-MacOSX-x86_64.sh
 
 # make sure to add conda to your PATH
-export PATH="/Users/chrishenrick/miniconda2/bin":$PATH
+export PATH="/Users/chrishenrick/miniconda3/bin":$PATH
 
 # create virtual env
 conda create -n jobs_map_env python
