@@ -18,8 +18,8 @@ data/wac: data
 	wget -i wac_list.txt -P data/wac
 
 data/census_tracts/tracts_2010_4326.shp: data
-	cp data_archive/census_tracts/nhgis0004_shapefile_tl2010_us_tract_2010.zip .; \
-	ogr2ogr -sql "select GEOID10, TRACTCE10, Shape_area from US_tract_2010 where STATEFP10 = '06' AND ALAND10 > 0 AND COUNTYFP10 IN ('001', '013', '041', '055', '075', '081', '085', '095', '097')" \
+	cp data_archived/census_tracts/nhgis0004_shapefile_tl2010_us_tract_2010.zip .; \
+	ogr2ogr -sql "select substr(GEOID10, 2) as GEOID, TRACTCE10 from US_tract_2010 where STATEFP10 = '06' AND ALAND10 > 0 AND COUNTYFP10 IN ('001', '013', '041', '055', '075', '081', '085', '095', '097')" \
 		-t_srs EPSG:4326 \
 		$@ \
 		/vsizip/nhgis0004_shapefile_tl2010_us_tract_2010.zip/US_tract_2010.shp; \
