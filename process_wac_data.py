@@ -55,7 +55,7 @@ def calc_job_density_quintiles(tracts, lq):
     returns a single dataframe
     """
     # convert the tract id column to int64 so that we can perform a join
-    tracts['tract_id'] = tracts['GEOID10'].astype(str).astype(int)
+    tracts['tract_id'] = tracts['GEOID'].astype(str).astype(int)
 
     # join tract geometries to aggregated blocks data
     tracts = tracts.merge(lq, how="inner", left_on="tract_id", right_on="trct")
@@ -76,9 +76,8 @@ def calc_job_density_quintiles(tracts, lq):
     tracts['quintile'] = pd.qcut(tracts["density"], 5, labels=False)
 
     # remove extra columns
-    del tracts['GEOID10']
+    del tracts['GEOID']
     del tracts['TRACTCE10']
-    del tracts['Shape_area']
     del tracts['geometry']
     del tracts['tract_id']
     del tracts['total']
