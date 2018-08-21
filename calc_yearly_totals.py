@@ -9,10 +9,11 @@ from process_wac_data import filter_cx_walk, read_csv, write_csv
 
 def calc_year_totals(wac, cxwalk, year):
     """
-    takes the workplace area characteristics dataframe and the 2010 census blocks dataframe
+    takes a year wac and wac crosswalk dataframes
     aggregates wac categories into 4 super categories
-    joins to blocks for 9 county SF bay area
+    joins to crosswalk for 9 county SF bay area
     groups by tract id
+    returns a list containing the year and category totals
     """
     # join wac df to cxwalk df using fields w_geocode and tabblk2010
     wac = wac.merge(cxwalk, how="inner", left_on="w_geocode", right_on="tabblk2010")
