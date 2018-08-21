@@ -25,9 +25,6 @@ data/census_tracts/tracts_2010_4326.shp: data
 		/vsizip/nhgis0004_shapefile_tl2010_us_tract_2010.zip/US_tract_2010.shp; \
 	rm nhgis0004_shapefile_tl2010_us_tract_2010.zip
 
-data/census_tracts/tracts_2010_4326.json: data/census_tracts/tracts_2010_4326.shp
-	mapshaper -i $< -simplify 10% -o $@ force format=topojson
-
 data/processed/wac_lq_2015_2002.csv: data/wac data/census_tracts/tracts_2010_4326.shp
 	. ./activate_venv.sh; \
 	python process_wac_data.py
@@ -35,3 +32,9 @@ data/processed/wac_lq_2015_2002.csv: data/wac data/census_tracts/tracts_2010_432
 data/processed/wac_yearly_breakdown.csv: data/wac data/census_tracts/tracts_2010_4326.shp
 	. ./activate_venv.sh; \
 	python calc_yearly_totals.py
+
+data/census_tracts/tracts_2010_4326_wac.shp: data/census_tracts/tracts_2010_4326.shp data/processed/wac_lq_2015_2002.csv
+	mapshaper $< -join data/processed/wac_lq_2015_2002.csv keys=GEOID,trct -o $@
+
+data/census_tracts/tracts_2010_4326_wac.json: data/census_tracts/tracts_2010_4326_wac.shp
+	mapshaper -i $< -simplify 10% -o $@ force format=topojson
