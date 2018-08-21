@@ -9,6 +9,7 @@
 # - calculates the job density quintiles for each tract
 # - saves processed data to an output csv file that may be joined to a 2010
 #   census tracts geometry shapefile
+# assumes you have necessary data in a directory called "data" (see main)
 
 import pandas as pd
 import geopandas as gpd
@@ -156,9 +157,10 @@ def write_csv(df, filepath):
     given a dataframe and filepath, write a csv file
     """
     try:
-        df.to_csv(filepath)
+        df.to_csv(filepath, index=False)
     except IOError:
         print("could not write %s" % filepath)
+        sys.exit()
 
 def read_shp(filepath):
     """
@@ -170,6 +172,7 @@ def read_shp(filepath):
         df = gpd.read_file(filepath)
     except IOError:
         print("could not read %s" % filepath)
+        sys.exit()
 
     return df
 
