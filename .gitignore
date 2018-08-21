@@ -1,5 +1,6 @@
 data/
 tmp/
 node_modules/
+scratch/
 .DS_Store
 
