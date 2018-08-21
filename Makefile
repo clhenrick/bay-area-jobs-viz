@@ -1,7 +1,7 @@
 all: \
 	data/processed/wac_lq_2015_2002.csv \
 	data/processed/wac_yearly_breakdown.csv \
-	data/census_tracts/tracts_2010_4326.json
+	data/census_tracts/tracts_2010_4326_wac.json
 
 clean:
 	rm -rf data/
