@@ -83,3 +83,18 @@ join_tracts: process_wac_lq
 # converts the joined tracts wac lq data to topojson format for the web
 tracts_to_topojson: join_tracts
 	mapshaper -i $(tractsdir)/$(tractsshp) -simplify 10% -o $(tractsdir)/$(tractsjoinedjson) format=topojson
+
+#########################
+# basemap data processing
+#########################
+process_osm_roads: fetch_osm_sf_bay_area
+	pushd $(osmdir); \
+	ogr2ogr \
+		-overwrite \
+		-skipfailures \
+		-sql "select type, ref from \"$(osmroads)\" where type IN ('motorway') OR ref IN ('CA 1', 'CA 4',  'CA 12', 'CA 12;CA 29','CA 17', 'CA 20', 'CA 29', 'CA 29;CA 121','CA 29;CA 128', 'CA 37', 'CA 84', 'CA 109', 'CA 121',  'CA 160', 'CA 175', 'CA 121', 'CA 128', 'CA 221', 'CA 237', 'I 280;CA 1','I 280;CA 35','I 5','I 580','I 680','I 80','I 80 Business','I 80 Business;US 50;CA 99','I 80;CA 113','I 80;CA 12','I 80;I 580','I 880','I 880;CA 84''I 980','US 101','US 101;CA 1','US 101;CA 116', 'CA 128','US 101;CA 128','US 101;CA 152','US 101;CA 156','US 101;CA 84') OR (type = 'trunk' AND name = 'Vasco Road')" \
+		$(majorroads).shp \
+		/vsizip/$(osmzip)/$(osmroads).shp; \
+	mapshaper $(majorroads).shp -simplify 60% -dissolve ref,type -o $(majorroads).shp force; \
+	mv $(majorroads).* ../basemap; \
+	popd
