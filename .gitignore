@@ -3,5 +3,5 @@ data_archived/
 tmp/
 node_modules/
 scratch/
+qgis/
 .DS_Store
-nhgis0004_shapefile_tl2010_us_tract_2010.zip
