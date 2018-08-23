@@ -6,6 +6,11 @@ wacdir = $(datadir)/wac
 tractsdir = $(datadir)/census_tracts
 processeddir = $(datadir)/processed
 
+# sub directories for basemap data
+osmdir = $(datadir)/osm
+countydir = $(datadir)/county
+basemapdir = $(datadir)/basemap
+
 # filenames for processed lehd wac data
 waclq = wac_lq_2015_2002.csv
 wacyearly = wac_yearly_breakdown.csv
@@ -14,6 +19,11 @@ wacyearly = wac_yearly_breakdown.csv
 tractsshp = tracts_2010_4326.shp
 tractsjoined = tracts_2010_4326_wac.shp
 tractsjoinedjson = tracts_2010_4326_wac.json
+
+# filenames for basemap data
+osmzip = san-francisco-bay_california.imposm-shapefiles.zip
+osmroads = san-francisco-bay_california_osm_roads
+majorroads = osm_major_roads
 
 # running `make` will do all of the following
 all: \
@@ -28,13 +38,19 @@ clean_processed:
 	rm -r $(processeddir)/*
 
 data:
-	mkdir -p $(wacdir) $(processeddir) $(tractsdir)
+	mkdir -p $(wacdir) $(processeddir) $(tractsdir) $(osmdir) $(countydir) $(basemapdir)
 
 # tells make that these targets are not files and are always out of date
-.PHONY: all clean clean_processed
+.PHONY: all clean clean_processed data
 
 fetch_wac_files: data
 	wget -i wac_list.txt -P $(wacdir)
+
+fetch_osm_sf_bay_area: data
+	wget https://s3.amazonaws.com/metro-extracts.nextzen.org/$(osmzip) -P $(osmdir)
+
+fetch_sf_bay_counties: data
+	wget http://spatial.lib.berkeley.edu/public/ark28722-s7hs4j/data.zip -P $(countydir)
 
 # creates a shapefile in wgs84 of census tracts for the 9 county SF Bay Area
 process_tracts: data
