@@ -99,7 +99,16 @@ process_osm_roads: fetch_osm_sf_bay_area
 		$(majorroads).shp \
 		/vsizip/$(osmzip)/$(osmroads).shp; \
 	mapshaper $(majorroads).shp -simplify 60% -dissolve ref,type -o $(majorroads).shp force; \
-	mv $(majorroads).* ../basemap; \
+	mv $(majorroads).* ../basemap
+
+process_osm_rail: fetch_osm_sf_bay_area
+	cd $(osmdir); \
+	ogr2ogr \
+		-sql "select type, name from \"$(osmroads)\" where type = 'subway' OR (name IN ('Peninsula', 'Coast Subdivision') AND type = 'rail')" \
+		$(rail).shp \
+		/vsizip/$(osmzip)/$(osmroads).shp; \
+	mapshaper $(rail).shp -simplify 60% -dissolve type,name -o $(rail).shp force; \
+	mv $(rail).* ../basemap
 
 process_osm_places: fetch_osm_sf_bay_area
 	cd $(osmdir); \
@@ -109,4 +118,4 @@ process_osm_places: fetch_osm_sf_bay_area
 		-sql "select name, type, population from \"$(osmplaces)\" where type IN ('city', 'town')" \
 		$(places).shp \
 		/vsizip/$(osmzip)/$(osmplaces).shp; \
-	mv $(places).* ../basemap; \
+	mv $(places).* ../basemap
