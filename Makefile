@@ -24,9 +24,11 @@ tractsjoinedjson = tracts_2010_4326_wac.json
 osmzip = san-francisco-bay_california.imposm-shapefiles.zip
 osmroads = san-francisco-bay_california_osm_roads
 osmplaces = san-francisco-bay_california_osm_places
+censuscounties = bayarea_county
 majorroads = osm_major_roads
 rail = osm_railways
 places = osm_cities_towns
+counties = county_boundaries
 
 # running `make` will do all of the following
 all: wac_analysis basemap_layers
@@ -93,9 +95,7 @@ join_tracts: process_wac_lq
 tracts_to_topojson: join_tracts
 	mapshaper -i $(tractsdir)/$(tractsshp) -simplify 10% -o $(tractsdir)/$(tractsjoinedjson) format=topojson
 
-#########################
-# basemap data processing
-#########################
+### basemap data processing
 process_osm_roads: fetch_osm_sf_bay_area
 	cd $(osmdir); \
 	ogr2ogr \
@@ -110,6 +110,8 @@ process_osm_roads: fetch_osm_sf_bay_area
 process_osm_rail: fetch_osm_sf_bay_area
 	cd $(osmdir); \
 	ogr2ogr \
+		-overwrite \
+		-skipfailures \
 		-sql "select type, name from \"$(osmroads)\" where type = 'subway' OR (name IN ('Peninsula', 'Coast Subdivision') AND type = 'rail')" \
 		$(rail).shp \
 		/vsizip/$(osmzip)/$(osmroads).shp; \
@@ -125,3 +127,15 @@ process_osm_places: fetch_osm_sf_bay_area
 		$(places).shp \
 		/vsizip/$(osmzip)/$(osmplaces).shp; \
 	mv $(places).* ../basemap
+
+process_counties: fetch_sf_bay_counties
+	cd $(countydir); \
+	ogr2ogr \
+		-sql "select COUNTY as name from $(censuscounties)" \
+		-overwrite \
+		-skipfailures \
+		-t_srs EPSG:4326 \
+		$(counties).shp \
+		/vsizip/data.zip/$(censuscounties).shp; \
+	mapshaper $(counties).shp -simplify 75% -o $(counties).shp force; \
+	mv $(counties).* ../basemap
