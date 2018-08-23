@@ -23,13 +23,19 @@ tractsjoinedjson = tracts_2010_4326_wac.json
 # filenames for basemap data
 osmzip = san-francisco-bay_california.imposm-shapefiles.zip
 osmroads = san-francisco-bay_california_osm_roads
+osmplaces = san-francisco-bay_california_osm_places
 majorroads = osm_major_roads
+rail = osm_railways
+places = osm_cities_towns
 
 # running `make` will do all of the following
-all: \
-	process_wac_lq \
-	process_wac_yearly \
-	tracts_to_topojson
+all: wac_analysis basemap_layers
+
+# run all targets for wac location quotient analysis
+wac_analysis: process_wac_lq process_wac_yearly tracts_to_topojson
+
+# run all targets relating to basemap geo data processing
+basemap_layers: process_osm_roads process_osm_rail process_osm_places
 
 clean:
 	rm -rf $(datadir)
