@@ -37,11 +37,14 @@ clean:
 clean_processed:
 	rm -r $(processeddir)/*
 
+clean_basemap:
+	rm -r $(basemapdir)/*
+
 data:
 	mkdir -p $(wacdir) $(processeddir) $(tractsdir) $(osmdir) $(countydir) $(basemapdir)
 
 # tells make that these targets are not files and are always out of date
-.PHONY: all clean clean_processed data
+.PHONY: all clean clean_processed clean_basemap data
 
 fetch_wac_files: data
 	wget -i wac_list.txt -P $(wacdir)
