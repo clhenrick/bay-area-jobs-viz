@@ -91,7 +91,7 @@ tracts_to_topojson: join_tracts
 # basemap data processing
 #########################
 process_osm_roads: fetch_osm_sf_bay_area
-	pushd $(osmdir); \
+	cd $(osmdir); \
 	ogr2ogr \
 		-overwrite \
 		-skipfailures \
@@ -100,4 +100,13 @@ process_osm_roads: fetch_osm_sf_bay_area
 		/vsizip/$(osmzip)/$(osmroads).shp; \
 	mapshaper $(majorroads).shp -simplify 60% -dissolve ref,type -o $(majorroads).shp force; \
 	mv $(majorroads).* ../basemap; \
-	popd
+
+process_osm_places: fetch_osm_sf_bay_area
+	cd $(osmdir); \
+	ogr2ogr \
+		-overwrite \
+		-skipfailures \
+		-sql "select name, type, population from \"$(osmplaces)\" where type IN ('city', 'town')" \
+		$(places).shp \
+		/vsizip/$(osmzip)/$(osmplaces).shp; \
+	mv $(places).* ../basemap; \
