@@ -11,6 +11,10 @@ osmdir = $(datadir)/osm
 countydir = $(datadir)/county
 basemapdir = $(datadir)/basemap
 
+# raw census tracts shapefile from nhgis
+# TODO: replace the monolithic us_tract_2010 file with a CA 2010 tracts file
+nhgistracts = nhgis0004_shapefile_tl2010_us_tract_2010.zip
+
 # filenames for processed lehd wac data
 waclq = wac_lq_2015_2002.csv
 wacyearly = wac_yearly_breakdown.csv
@@ -54,6 +58,9 @@ data:
 fetch_wac_files: data
 	wget -i wac_list.txt -P $(wacdir)
 
+fetch_nhgis_us_tract_2010: data
+	wget -O $(tractsdir)/$(nhgistracts) https://www.dropbox.com/s/cjk8bnh2xd9o8p7/nhgis0004_shapefile_tl2010_us_tract_2010.zip?dl=1
+
 fetch_osm_sf_bay_area: data
 	wget https://s3.amazonaws.com/metro-extracts.nextzen.org/$(osmzip) -P $(osmdir)
 
@@ -61,18 +68,16 @@ fetch_sf_bay_counties: data
 	wget http://spatial.lib.berkeley.edu/public/ark28722-s7hs4j/data.zip -P $(countydir)
 
 # creates a shapefile in wgs84 of census tracts for the 9 county SF Bay Area
-process_tracts: data
-	# TODO: replace the monolithic us_tract_2010 file with a CA 2010 tracts file that is curl'd from the interweb
+process_tracts: data fetch_nhgis_us_tract_2010
 	. ./activate_venv.sh; \
-	cp data_archived/census_tracts/nhgis0004_shapefile_tl2010_us_tract_2010.zip .; \
+	cd $(tractsdir); \
 	ogr2ogr \
 		-overwrite \
 		-skipfailures \
 		-sql "select substr(GEOID10, 2) as GEOID, TRACTCE10 from US_tract_2010 where STATEFP10 = '06' AND ALAND10 > 0 AND COUNTYFP10 IN ('001', '013', '041', '055', '075', '081', '085', '095', '097')" \
 		-t_srs EPSG:4326 \
-		$(tractsdir)/$(tractsshp) \
-		/vsizip/nhgis0004_shapefile_tl2010_us_tract_2010.zip/US_tract_2010.shp; \
-	rm nhgis0004_shapefile_tl2010_us_tract_2010.zip
+		$(tractsshp) \
+		/vsizip/$(nhgistracts)/US_tract_2010.shp; \
 
 # TODO: python script should accept filenames from here as args rather then be hardcoded in the script
 process_wac_lq: fetch_wac_files process_tracts
