@@ -31,13 +31,10 @@ places = osm_cities_towns
 counties = county_boundaries
 
 # running `make` will do all of the following
-all: wac_analysis basemap_layers
+all: wac_analysis basemap_layers.json
 
 # run all targets for wac location quotient analysis
 wac_analysis: process_wac_lq process_wac_yearly tracts_to_topojson
-
-# run all targets relating to basemap geo data processing
-basemap_layers: process_osm_roads process_osm_rail process_osm_places
 
 clean:
 	rm -rf $(datadir)
@@ -139,3 +136,11 @@ process_counties: fetch_sf_bay_counties
 		/vsizip/data.zip/$(censuscounties).shp; \
 	mapshaper $(counties).shp -simplify 75% -o $(counties).shp force; \
 	mv $(counties).* ../basemap
+
+basemap_layers.json: process_osm_roads process_osm_rail process_osm_places process_counties
+	cd $(basemapdir); \
+	mapshaper \
+		-i $(majorroads).shp $(rail).shp $(places).shp $(counties).shp \
+		combine-files \
+		-o $@ \
+		format=topojson
