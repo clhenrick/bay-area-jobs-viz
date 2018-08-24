@@ -74,12 +74,12 @@ process_tracts: data
 		/vsizip/nhgis0004_shapefile_tl2010_us_tract_2010.zip/US_tract_2010.shp; \
 	rm nhgis0004_shapefile_tl2010_us_tract_2010.zip
 
-# TODO: python script should consume filenames from here rather then be hardcoded in the python script
+# TODO: python script should accept filenames from here as args rather then be hardcoded in the script
 process_wac_lq: fetch_wac_files process_tracts
 	. ./activate_venv.sh; \
 	python process_wac_data.py
 
-# TODO: python script should consume filenames from here rather then be hardcoded in the python script
+# TODO: python script should accept filenames from here as args rather then be hardcoded in the script
 process_wac_yearly: fetch_wac_files
 	. ./activate_venv.sh; \
 	python calc_yearly_totals.py
@@ -93,6 +93,29 @@ tracts_to_topojson: join_tracts
 	mapshaper -i $(tractsdir)/$(tractsshp) -simplify 10% -o $(tractsdir)/$(tractsjoinedjson) format=topojson
 
 ### basemap data processing
+process_counties: fetch_sf_bay_counties
+	cd $(countydir); \
+	ogr2ogr \
+		-sql "select COUNTY as name from $(censuscounties)" \
+		-overwrite \
+		-skipfailures \
+		-t_srs EPSG:4326 \
+		$(counties).shp \
+		/vsizip/data.zip/$(censuscounties).shp; \
+	mapshaper $(counties).shp -simplify 75% -o $(counties).shp force; \
+	mv $(counties).* ../basemap
+
+process_osm_places: fetch_osm_sf_bay_area process_counties
+	cd $(osmdir); \
+	ogr2ogr \
+		-overwrite \
+		-skipfailures \
+		-sql "select name, type from \"$(osmplaces)\" where type IN ('city', 'town') and population >= 25000" \
+		$(places).shp \
+		/vsizip/$(osmzip)/$(osmplaces).shp; \
+	mapshaper $(places).shp -clip ../basemap/$(counties).shp -o $(places).shp force; \
+	mv $(places).* ../basemap
+
 process_osm_roads: fetch_osm_sf_bay_area
 	cd $(osmdir); \
 	ogr2ogr \
@@ -115,29 +138,7 @@ process_osm_rail: fetch_osm_sf_bay_area
 	mapshaper $(rail).shp -simplify 60% -dissolve type,name -o $(rail).shp force; \
 	mv $(rail).* ../basemap
 
-process_osm_places: fetch_osm_sf_bay_area
-	cd $(osmdir); \
-	ogr2ogr \
-		-overwrite \
-		-skipfailures \
-		-sql "select name, type, population from \"$(osmplaces)\" where type IN ('city', 'town')" \
-		$(places).shp \
-		/vsizip/$(osmzip)/$(osmplaces).shp; \
-	mv $(places).* ../basemap
-
-process_counties: fetch_sf_bay_counties
-	cd $(countydir); \
-	ogr2ogr \
-		-sql "select COUNTY as name from $(censuscounties)" \
-		-overwrite \
-		-skipfailures \
-		-t_srs EPSG:4326 \
-		$(counties).shp \
-		/vsizip/data.zip/$(censuscounties).shp; \
-	mapshaper $(counties).shp -simplify 75% -o $(counties).shp force; \
-	mv $(counties).* ../basemap
-
-basemap_layers.json: process_osm_roads process_osm_rail process_osm_places process_counties
+basemap_layers.json: process_osm_places process_osm_roads process_osm_rail
 	cd $(basemapdir); \
 	mapshaper \
 		-i $(majorroads).shp $(rail).shp $(places).shp $(counties).shp \
