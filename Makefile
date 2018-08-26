@@ -15,6 +15,9 @@ basemapdir = $(datadir)/basemap
 # TODO: replace the monolithic us_tract_2010 file with a CA 2010 tracts file
 nhgistracts = nhgis0004_shapefile_tl2010_us_tract_2010.zip
 
+# polygon for clipping basemap osm roads and rail
+sfbayclip = bay_area_clip
+
 # filenames for processed lehd wac data
 waclq = wac_lq_2015_2002.csv
 wacyearly = wac_yearly_breakdown.csv
@@ -66,6 +69,11 @@ fetch_osm_sf_bay_area: data
 
 fetch_sf_bay_counties: data
 	wget http://spatial.lib.berkeley.edu/public/ark28722-s7hs4j/data.zip -P $(countydir)
+
+fetch_sf_bay_clip: data
+	cd $(basemapdir); \
+	wget -O $(sfbayclip).zip https://www.dropbox.com/s/jathq6xnw1mhth4/bay_area_clip.zip?dl=1; \
+	unzip $(sfbayclip).zip
 
 # creates a shapefile in wgs84 of census tracts for the 9 county SF Bay Area
 process_tracts: data fetch_nhgis_us_tract_2010
