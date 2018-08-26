@@ -11,8 +11,8 @@ osmdir = $(datadir)/osm
 countydir = $(datadir)/county
 basemapdir = $(datadir)/basemap
 
-# raw census tracts shapefile from nhgis
-# TODO: replace the monolithic us_tract_2010 file with a CA 2010 tracts file
+# census tracts shapefile from nhgis
+# TODO: replace this monolithic us_tract_2010 file with a CA 2010 tracts file
 nhgistracts = nhgis0004_shapefile_tl2010_us_tract_2010.zip
 
 # filenames for processed lehd wac data
@@ -87,11 +87,13 @@ process_tracts: data fetch_nhgis_us_tract_2010
 		$(tractsshp) \
 		/vsizip/$(nhgistracts)/US_tract_2010.shp; \
 
+# runs script for wac lq analysis
 # TODO: python script should accept filenames from here as args rather then be hardcoded in the script
 process_wac_lq: fetch_wac_files process_tracts
 	. ./activate_venv.sh; \
 	python process_wac_data.py
 
+# runs script to calc yearly breakdown of job types across sf bay region
 # TODO: python script should accept filenames from here as args rather then be hardcoded in the script
 process_wac_yearly: fetch_wac_files
 	. ./activate_venv.sh; \
@@ -105,7 +107,7 @@ join_tracts: process_wac_lq
 tracts_to_topojson: join_tracts
 	mapshaper -i $(tractsdir)/$(tractsshp) -simplify 10% -o $(tractsdir)/$(tractsjoinedjson) format=topojson
 
-### basemap data processing
+# remaining targets are for basemap data processing
 process_counties: fetch_sf_bay_counties
 	cd $(countydir); \
 	ogr2ogr \
@@ -134,7 +136,7 @@ process_osm_roads: fetch_osm_sf_bay_area fetch_sf_bay_clip
 	ogr2ogr \
 		-overwrite \
 		-skipfailures \
-		-sql "select type, ref from \"$(osmroads)\" where type IN ('motorway') OR ref IN ('CA 1', 'CA 4',  'CA 12', 'CA 12;CA 29','CA 17', 'CA 20', 'CA 29', 'CA 29;CA 121','CA 29;CA 128', 'CA 37', 'CA 84', 'CA 109', 'CA 121',  'CA 160', 'CA 175', 'CA 121', 'CA 128', 'CA 221', 'CA 237', 'I 280;CA 1','I 280;CA 35','I 5','I 580','I 680','I 80','I 80 Business','I 80 Business;US 50;CA 99','I 80;CA 113','I 80;CA 12','I 80;I 580','I 880','I 880;CA 84''I 980','US 101','US 101;CA 1','US 101;CA 116', 'CA 128','US 101;CA 128','US 101;CA 152','US 101;CA 156','US 101;CA 84') OR (type = 'trunk' AND name = 'Vasco Road')" \
+		-sql "select type, ref from \"$(osmroads)\" where type IN ('motorway') OR ref IN ('CA 1', 'CA 4', 'CA 12', 'CA 12;CA 29','CA 17', 'CA 20', 'CA 29', 'CA 29;CA 121','CA 29;CA 128', 'CA 37', 'CA 84', 'CA 109', 'CA 121',  'CA 160', 'CA 175', 'CA 121', 'CA 128', 'CA 221', 'CA 237', 'I 280;CA 1','I 280;CA 35','I 5','I 580','I 680','I 80','I 80 Business','I 80 Business;US 50;CA 99','I 80;CA 113','I 80;CA 12','I 80;I 580','I 880','I 880;CA 84''I 980','US 101','US 101;CA 1','US 101;CA 116', 'CA 128','US 101;CA 128','US 101;CA 152','US 101;CA 156','US 101;CA 84') OR (type = 'trunk' AND name = 'Vasco Road')" \
 		$(majorroads).shp \
 		/vsizip/$(osmzip)/$(osmroads).shp; \
 	mapshaper \
