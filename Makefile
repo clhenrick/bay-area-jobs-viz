@@ -15,9 +15,6 @@ basemapdir = $(datadir)/basemap
 # TODO: replace the monolithic us_tract_2010 file with a CA 2010 tracts file
 nhgistracts = nhgis0004_shapefile_tl2010_us_tract_2010.zip
 
-# polygon for clipping basemap osm roads and rail
-sfbayclip = bay_area_clip
-
 # filenames for processed lehd wac data
 waclq = wac_lq_2015_2002.csv
 wacyearly = wac_yearly_breakdown.csv
@@ -36,6 +33,9 @@ majorroads = osm_major_roads
 rail = osm_railways
 places = osm_cities_towns
 counties = county_boundaries
+
+# polygon for clipping basemap osm roads and rail
+sfbayclip = bay_area_clip
 
 # running `make` will do all of the following
 all: wac_analysis basemap_layers.json
@@ -129,7 +129,7 @@ process_osm_places: fetch_osm_sf_bay_area process_counties
 	mapshaper $(places).shp -clip ../basemap/$(counties).shp -o $(places).shp force; \
 	mv $(places).* ../basemap
 
-process_osm_roads: fetch_osm_sf_bay_area
+process_osm_roads: fetch_osm_sf_bay_area fetch_sf_bay_clip
 	cd $(osmdir); \
 	ogr2ogr \
 		-overwrite \
@@ -137,10 +137,15 @@ process_osm_roads: fetch_osm_sf_bay_area
 		-sql "select type, ref from \"$(osmroads)\" where type IN ('motorway') OR ref IN ('CA 1', 'CA 4',  'CA 12', 'CA 12;CA 29','CA 17', 'CA 20', 'CA 29', 'CA 29;CA 121','CA 29;CA 128', 'CA 37', 'CA 84', 'CA 109', 'CA 121',  'CA 160', 'CA 175', 'CA 121', 'CA 128', 'CA 221', 'CA 237', 'I 280;CA 1','I 280;CA 35','I 5','I 580','I 680','I 80','I 80 Business','I 80 Business;US 50;CA 99','I 80;CA 113','I 80;CA 12','I 80;I 580','I 880','I 880;CA 84''I 980','US 101','US 101;CA 1','US 101;CA 116', 'CA 128','US 101;CA 128','US 101;CA 152','US 101;CA 156','US 101;CA 84') OR (type = 'trunk' AND name = 'Vasco Road')" \
 		$(majorroads).shp \
 		/vsizip/$(osmzip)/$(osmroads).shp; \
-	mapshaper $(majorroads).shp -simplify 60% -dissolve ref,type -o $(majorroads).shp force; \
+	mapshaper \
+		$(majorroads).shp \
+		-simplify 60% \
+		-dissolve ref,type \
+		-clip ../basemap/$(sfbayclip).shp \
+		-o $(majorroads).shp force; \
 	mv $(majorroads).* ../basemap
 
-process_osm_rail: fetch_osm_sf_bay_area
+process_osm_rail: fetch_osm_sf_bay_area fetch_sf_bay_clip
 	cd $(osmdir); \
 	ogr2ogr \
 		-overwrite \
@@ -148,7 +153,12 @@ process_osm_rail: fetch_osm_sf_bay_area
 		-sql "select type, name from \"$(osmroads)\" where type = 'subway' OR (name IN ('Peninsula', 'Coast Subdivision') AND type = 'rail')" \
 		$(rail).shp \
 		/vsizip/$(osmzip)/$(osmroads).shp; \
-	mapshaper $(rail).shp -simplify 60% -dissolve type,name -o $(rail).shp force; \
+	mapshaper \
+		$(rail).shp \
+		-simplify 60% \
+		-dissolve type,name \
+		-clip ../basemap/$(sfbayclip).shp \
+		-o $(rail).shp force; \
 	mv $(rail).* ../basemap
 
 basemap_layers.json: process_osm_places process_osm_roads process_osm_rail
