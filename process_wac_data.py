@@ -74,6 +74,7 @@ def calc_job_density_quintiles(tracts, lq):
 
     # compute the quintiles for job density
     tracts['quintile'] = pd.qcut(tracts["density"], 5, labels=False)
+    print(pd.qcut(tracts["density"], 5))
 
     # remove extra columns
     del tracts['GEOID']
