@@ -1,16 +1,18 @@
 // URL: https://beta.observablehq.com/d/3b297925cd0d3aae
-// Title: AEMP Jobs Viz SVG Exporter
+// Title: SF Bay Area Jobs Viz SVG Exporter
 // Author: Chris Henrick (@clhenrick)
-// Version: 365
+// Version: 502
 // Runtime version: 1
 
 const m0 = {
-  id: "3b297925cd0d3aae@365",
+  id: "3b297925cd0d3aae@502",
   variables: [
     {
       inputs: ["md"],
       value: (function(md){return(
-md`# AEMP Jobs Viz SVG Exporter`
+md`# SF Bay Area Jobs Viz SVG Exporter
+
+_**Note:** see [this notebook for job density](https://beta.observablehq.com/d/42685ed1a5e38b0b)_`
 )})
     },
     {
@@ -20,11 +22,7 @@ md`The job categories are: _${categories.map(d => d.label).join(", ")}_.
 
 The current selected category is: **${categories.find(d => d.value === category).label} Jobs**
 
-Currently toggled to show: **${toggleValue ? 'Change in LQ from 2002 – 2015' : '2015 Location Quotient'}**
-
-### TO DO:
-- legend
-- finalize color palettes`
+Currently toggled to show: **${toggleValue ? 'Change in LQ from 2002 – 2015' : '2015 Location Quotient'}**`
 )})
     },
     {
@@ -60,6 +58,21 @@ button({
       value: (G, _) => G.input(_)
     },
     {
+      name: "viewof mapframe",
+      inputs: ["button"],
+      value: (function(button){return(
+button({
+  value: "Map Frame",
+  description: "Hide or show the map frame / neatline."
+})
+)})
+    },
+    {
+      name: "mapframe",
+      inputs: ["Generators","viewof mapframe"],
+      value: (G, _) => G.input(_)
+    },
+    {
       name: "viewof jobDensityQuintile",
       inputs: ["slider"],
       value: (function(slider){return(
@@ -80,8 +93,8 @@ slider({
     },
     {
       name: "choropleth",
-      inputs: ["DOM","map","d3","tracts","path","toggleValue","greys","threshold","cluster","jobDensityQuintile","topojson","tractsTopoJSON","topojsonObj","boundaryFilter","tractsOutline"],
-      value: (function(DOM,map,d3,tracts,path,toggleValue,greys,threshold,cluster,jobDensityQuintile,topojson,tractsTopoJSON,topojsonObj,boundaryFilter,tractsOutline)
+      inputs: ["DOM","map","d3","tracts","path","toggleValue","greys","threshold","cluster","jobDensityQuintile","topojson","tractsTopoJSON","topojsonObj","boundaryFilter","tractsOutline","showMapframe"],
+      value: (function(DOM,map,d3,tracts,path,toggleValue,greys,threshold,cluster,jobDensityQuintile,topojson,tractsTopoJSON,topojsonObj,boundaryFilter,tractsOutline,showMapframe)
 {
   var div = this || DOM.element('div');
   div.appendChild(map)
@@ -144,19 +157,22 @@ slider({
     .attr("d", path)
   
   // this is what the map will be cropped to in adobe illustrator
-  // TODO: make this toggleable
   const mapFrame = g.select("#map-frame").node() 
     ? g.select("#map-frame") 
     : g.append("rect").attr("id", "map-frame")
-  
-  mapFrame
-    .attr("x", 403)
-    .attr("y", 561)
-    .attr("width", 334)
-    .attr("height", 432)
-    .attr("fill", "none")
-    .attr("stroke", "#000")
-    .attr("stroke-width", 1)
+
+  if (showMapframe) {
+    mapFrame
+      .attr("x", 403)
+      .attr("y", 561)
+      .attr("width", 334)
+      .attr("height", 432)
+      .attr("fill", "none")
+      .attr("stroke", "#000")
+      .attr("stroke-width", 1)
+  } else {
+    mapFrame.remove()
+  }
   
   return div;
 }
@@ -178,7 +194,120 @@ d3.select(choropleth).select("svg").node()
     {
       inputs: ["md"],
       value: (function(md){return(
+md`### legend`
+)})
+    },
+    {
+      name: "legend",
+      inputs: ["legendSpec","d3","DOM","xScale","toggleValue","threshold","cluster","xAxis"],
+      value: (function(legendSpec,d3,DOM,xScale,toggleValue,threshold,cluster,xAxis)
+{
+  const { margin, domain, title, width: w, height: h } = legendSpec
+  
+  const svg = d3.select(DOM.svg(w, h))
+  
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`)
+  
+  g.append("g")
+    .attr("id", "legend-boxes")
+    .selectAll("rect")
+    .data(domain.map((d, i, arr) => [d, arr[i + 1]]))
+    .enter().append("rect")
+    .attr("x", d => xScale(d[0]))
+    .attr("y", 0)
+    .attr("width", d => xScale(d[1]) - xScale(d[0]))
+    .attr("height", h - margin.top - margin.bottom)
+    .attr("fill", d => toggleValue ? threshold(d[0]) : cluster(d[0]))
+  
+  g.append("g")
+    .attr("id", "legend-ticks-lables")
+    .attr("transform", `translate(0, ${h - margin.bottom - margin.top})`)
+    .call(xAxis)
+  
+  g.select(".domain").remove()
+  
+  g.append("text")
+    .attr("y", -10)
+    .attr("font-weight", "bold")
+    .attr("text-anchor", "start")
+    .style("font", "11px sans-serif")
+    .text(title)
+
+  return svg.node()
+}
+)
+    },
+    {
+      inputs: ["DOM","serialize","legend","category","toggleValue"],
+      value: (function(DOM,serialize,legend,category,toggleValue){return(
+DOM.download(serialize(legend), `legend-${category}-${toggleValue ? "change" : "lq2015"}`, "Download as SVG")
+)})
+    },
+    {
+      inputs: ["md"],
+      value: (function(md){return(
+md`### legend helpers`
+)})
+    },
+    {
+      name: "legendSpec",
+      inputs: ["toggleValue","selectedCategoryLabel","thresholdExtent","thresholds","clusterExtent","clusters"],
+      value: (function(toggleValue,selectedCategoryLabel,thresholdExtent,thresholds,clusterExtent,clusters){return(
+{
+  margin: { top: 20, left: 10, bottom: 20, right: 30 },
+  width: 300,
+  height: 50,
+  title: toggleValue 
+    ? `Change in Location Quotient for ${selectedCategoryLabel} jobs` 
+    : `2015 Location Quotient for ${selectedCategoryLabel} jobs`,
+  domain: toggleValue 
+    ? [thresholdExtent[0], ...thresholds, thresholdExtent[1]]
+    : [clusterExtent[0], ...clusters, clusterExtent[1]]
+}
+)})
+    },
+    {
+      name: "xAxis",
+      inputs: ["d3","xScale","format"],
+      value: (function(d3,xScale,format){return(
+d3.axisBottom(xScale)
+  .tickValues(xScale.domain())
+  .tickFormat(format)
+)})
+    },
+    {
+      name: "xScale",
+      inputs: ["legendSpec","d3"],
+      value: (function(legendSpec,d3)
+{
+  const m = legendSpec.margin
+  const w = legendSpec.width - m.right - m.left
+  const domain = legendSpec.domain
+
+  return d3.scaleLinear()
+    .range(d3.range(0, w + 1, w / 5))
+    .domain(domain)
+}
+)
+    },
+    {
+      name: "format",
+      inputs: ["d3"],
+      value: (function(d3){return(
+d3.format(".2f")
+)})
+    },
+    {
+      inputs: ["md"],
+      value: (function(md){return(
 md`### data`
+)})
+    },
+    {
+      inputs: ["md"],
+      value: (function(md){return(
+md`Location quotient data joined to 2010 census tract geometries for the 9 county SF Bay Area.`
 )})
     },
     {
@@ -238,7 +367,7 @@ md`### palette`
     {
       inputs: ["md","numberClasses"],
       value: (function(md,numberClasses){return(
-md`Limiting the palette to ${numberClasses} classes so the ramps are optimized for physical prints.`
+md`I chose to limit the palette to ${numberClasses} classes so that the color ramps are optimized for print.`
 )})
     },
     {
@@ -395,14 +524,20 @@ md`### scales`
     {
       inputs: ["md"],
       value: (function(md){return(
-md`Threshold scale is used for showing change in LQ, quantile scale is used for showing 2015 LQ.`
+md`A threshold scale is used for showing change in LQ and a cluster scale is used for showing 2015 LQ.`
 )})
     },
     {
-      name: "extent",
-      inputs: ["d3","tracts","toggleValue"],
-      value: (function(d3,tracts,toggleValue){return(
-d3.extent(tracts.features.map(d => toggleValue ? d.properties.change : d.properties.lq2015))
+      name: "thresholdExtent",
+      inputs: ["d3","tracts"],
+      value: (function(d3,tracts){return(
+d3.extent(tracts.features.map(d => d.properties.change))
+)})
+    },
+    {
+      name: "thresholds",
+      value: (function(){return(
+[-1.5, -0.1, 0.1, 1.5]
 )})
     },
     {
@@ -415,30 +550,16 @@ d3.scaleThreshold()
 )})
     },
     {
-      name: "quantile",
-      inputs: ["d3","tracts","curLqRamp"],
-      value: (function(d3,tracts,curLqRamp){return(
-d3.scaleQuantile()
-  .domain(tracts.features.map(d => d.properties.lq2015))
-  .range(curLqRamp)
-)})
-    },
-    {
       inputs: ["md"],
       value: (function(md){return(
-md`quantiles via quantile scale:`
+md`I'm using a cluster scale as an alternative classification method to quantiles. Uses ckmeans algorithm which is similar to Jenks natural breaks.`
 )})
     },
     {
-      inputs: ["quantile"],
-      value: (function(quantile){return(
-quantile.quantiles()
-)})
-    },
-    {
-      inputs: ["md"],
-      value: (function(md){return(
-md`cluster scale for comparison with quantiles`
+      name: "clusterExtent",
+      inputs: ["d3","tracts"],
+      value: (function(d3,tracts){return(
+d3.extent(tracts.features.map(d => d.properties.lq2015))
 )})
     },
     {
@@ -457,6 +578,7 @@ md`clusters from cluster scale:`
 )})
     },
     {
+      name: "clusters",
       inputs: ["cluster"],
       value: (function(cluster){return(
 cluster.clusters()
@@ -472,6 +594,13 @@ md`### misc`
       name: "defaultCategory",
       value: (function(){return(
 'prof'
+)})
+    },
+    {
+      name: "selectedCategoryLabel",
+      inputs: ["categories","category"],
+      value: (function(categories,category){return(
+categories.find(d => d.value === category).label
 )})
     },
     {
@@ -508,33 +637,43 @@ md`### misc`
 )
     },
     {
+      name: "showMapframe",
+      inputs: ["mapframe"],
+      value: (function(mapframe)
+{
+  mapframe
+  return !this;
+}
+)
+    },
+    {
       inputs: ["md"],
       value: (function(md){return(
 md`### dependencies`
 )})
     },
     {
-      from: "3b297925cd0d3aae@365/51",
+      from: "3b297925cd0d3aae@502/62",
       name: "map",
       remote: "map"
     },
     {
-      from: "3b297925cd0d3aae@365/51",
+      from: "3b297925cd0d3aae@502/62",
       name: "projection",
       remote: "projection"
     },
     {
-      from: "3b297925cd0d3aae@365/51",
+      from: "3b297925cd0d3aae@502/62",
       name: "path",
       remote: "path"
     },
     {
-      from: "3b297925cd0d3aae@365/51",
+      from: "3b297925cd0d3aae@502/62",
       name: "greys",
       remote: "greys"
     },
     {
-      from: "3b297925cd0d3aae@365/51",
+      from: "3b297925cd0d3aae@502/62",
       name: "boundaryFilter",
       remote: "boundaryFilter"
     },
@@ -614,7 +753,7 @@ md`### scratch`
 };
 
 const m1 = {
-  id: "3b297925cd0d3aae@365/51",
+  id: "3b297925cd0d3aae@502/62",
   variables: [
     {
       name: "map",
@@ -789,7 +928,7 @@ require("d3")
 )})
     },
     {
-      from: "3b297925cd0d3aae@365",
+      from: "3b297925cd0d3aae@502",
       name: "width",
       remote: "width"
     },
@@ -1052,7 +1191,7 @@ require("d3-format")
 };
 
 const notebook = {
-  id: "3b297925cd0d3aae@365",
+  id: "3b297925cd0d3aae@502",
   modules: [m0,m1,m2,m3]
 };
 
