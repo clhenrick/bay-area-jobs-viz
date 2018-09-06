@@ -64,6 +64,13 @@ Then hand edit the `bay_area_clip.shp` file in QGIS using the "Node Tool", "Spli
 
 Finally, convert the linestring geometry back into a polygon for use with clipping osm roads and railways using QGIS (Vector > Geometry Tools > Lines to Polygons).
 
+## Notebooks
+I used both Jupyter and Observable notebooks for this project, see the `notebooks/` directory for the related files.
+
+Data analysis was done using `python3`, `pandas`, `geopandas`, and `jupyter`. See the `.ipynb` files for data analysis and transformation procedures. These notebooks may be viewed by running `jupyter notebook` in the root directory of this repository and then navigating to the `notebooks/` directory in the Jupyter dashboard.
+
+The maps were created using Observable Notebooks, a web browser based Javascript notebook format, and may be viewed on beta.observablehq.com. I've archived them in the `notebooks` directory, but need to add a script to run these notebooks locally.
+
 ## Environment Setup
 For using Python Pandas and GeoPandas for data processing.
 
@@ -94,6 +101,10 @@ conda install gdal
 
 # install geopandas
 conda install -c conda-forge geopandas
+
+# install jupyter
+python -m pip install --upgrade pip
+python -m pip install jupyter
 
 # to deactivate the virtual env
 source deactivate
