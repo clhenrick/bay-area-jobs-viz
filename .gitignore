@@ -4,4 +4,6 @@ tmp/
 node_modules/
 scratch/
 qgis/
+notebooks/.ipynb_checkpoints/
+notebooks/*.csv
 .DS_Store
