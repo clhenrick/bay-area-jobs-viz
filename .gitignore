@@ -6,4 +6,9 @@ scratch/
 qgis/
 notebooks/.ipynb_checkpoints/
 notebooks/*.csv
+notebooks/*.shp
+notebooks/*.shx
+notebooks/*.prj
+notebooks/*.dbf
+notebooks/*.cpg
 .DS_Store
