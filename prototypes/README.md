@@ -1,7 +1,7 @@
 # Prototypes
-Map experiments for visualizing WAC location quotients.
+Experiments for visualizing Census LEHD LODES WAC data.
 
-To view examples run an HTTP server in the root of this repo. Note it assumes data files are available locally at `../data`
+To view examples run an HTTP server in this directory such as `python -m http.server`
 
 - [01: WAC Location Quotient for 2002](./01)
 
@@ -26,15 +26,3 @@ To view examples run an HTTP server in the root of this repo. Note it assumes da
 - [11: Stacked Bar Chart of Percentage Regional Change 2002 – 2015](./11)
 
 - [12: Stacked Bar Chart of Regional Change 2002 – 2015](./12)
-
-## TO DO:
-
-- [ ] Legends for maps
-
-- [ ] Figure out classification scheme (equal interval, standard deviation, custom?)
-
-- [ ] Make a general data explorer that lets a user:
-  - pick any given year from 2002 to 2015
-  - see the difference between any two years
-  - dynamically classify data & set color scale domain
-  - use Leaflet and a tile layer for better zooming and panning and basemap context

@@ -1,6 +1,6 @@
-data/
-data_archived/
-tmp/
+/data/
+/data_archived/
+/tmp/
 node_modules/
 scratch/
 qgis/
