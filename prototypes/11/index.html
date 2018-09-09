@@ -37,15 +37,15 @@ var stack = d3.stack()
 
 var format = d3.format(".2f")
 
-d3.csv("data.csv", type, function(error, data) {
+d3.csv("../data/yearly_breakdown.csv", type, function(error, data) {
   if (error) throw error;
-  
+
   data.columns.pop(); // don't need "all"
 
-  data.sort(function(a, b) { 
-    return b[data.columns[1]] / b.total - a[data.columns[1]] / a.total; 
+  data.sort(function(a, b) {
+    return b[data.columns[1]] / b.total - a[data.columns[1]] / a.total;
   });
-  
+
   console.log(data)
 
   x.domain(data.map(function(d) { return +d.year; }).sort());
@@ -69,7 +69,7 @@ d3.csv("data.csv", type, function(error, data) {
         var el = d3.select(this)
         el.append("title").text(format(d[1] - d[0]) + "%")
   		})
-  		
+
 
   g.append("g")
       .attr("class", "axis axis--x")
@@ -82,11 +82,11 @@ d3.csv("data.csv", type, function(error, data) {
 
   var legend = serie.append("g")
       .attr("class", "legend")
-      .attr("transform", function(d) { 
-        var d = d.find(d2 => d2.data.year === 2015) 
-        return "translate(" + 
-          (x(d.data.year) + x.bandwidth()) + "," + 
-          ((y(d[0]) + y(d[1])) / 2) + ")"; 
+      .attr("transform", function(d) {
+        var d = d.find(d2 => d2.data.year === 2015)
+        return "translate(" +
+          (x(d.data.year) + x.bandwidth()) + "," +
+          ((y(d[0]) + y(d[1])) / 2) + ")";
       });
 
   legend.append("line")

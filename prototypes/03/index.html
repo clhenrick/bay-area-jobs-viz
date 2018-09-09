@@ -171,9 +171,9 @@
   renderDropdown()
 
   // load csv data async to join on tracts topology, this way we can load data for any year...
-  d3.csv("../../data/tracts_processed_lq/tracts_lq_2002/tracts_lq_2002.csv", function(error, lq) {
+  d3.csv("../data/tracts_lq_2002.csv", function(error, lq) {
     if (error) throw error;
-    d3.json("../../data/census_tracts/census_tracts_2016_bay_area_4326.json", function(error, topology) {
+    d3.json("../data/census_tracts_2016_bay_area_4326.json", function(error, topology) {
       if (error) throw error;
       main(lq, topology);
     })
