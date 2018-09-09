@@ -1,8 +1,8 @@
 # SF Bay Area Jobs Viz
-Visualizing the change in job types of the SF Bay Area from 2002 – 2015 through a *Location Quotient* analysis of U.S. Census' [Longitudinal Employer-Household Dynamics Workplace Area Characteristics data](https://lehd.ces.census.gov/data/).
+Visualizing the change in job types within the San Francisco Bay Area from 2002 – 2015 through a *Location Quotient* analysis of U.S. Census' [Longitudinal Employer-Household Dynamics – Origin-Destination Employment Statistics – Workplace Area Characteristics data](https://lehd.ces.census.gov/data/).
 
 ## Analysis
-The U.S. Census LEHD classifies job types using 2-digit NAICS codes to represent the primary industry of the employing company. Rather then analyze each category individually I aggregated them into four "super categories" listed below, following Robert Manduca's analysis for his [Job Dot Map](http://www.robertmanduca.com/projects/jobs.html).
+The U.S. Census LEHD classifies job types using 2-digit NAICS codes to represent the primary industry of the employing company. Rather then analyze each category individually I aggregated them into four "super categories" listed below, similar to Robert Manduca's analysis for his [Job Dot Map](http://www.robertmanduca.com/projects/jobs.html).
 
 - **Manufacturing and Logistics**: 11 (Agriculture and Forestry), 21 (Mining), 22 (Utilities), 23 (Construction), 31-33 (Manufacturing), 42 (Wholesale Trade), 48-49 (Transportation and Warehousing)
 
@@ -10,13 +10,13 @@ The U.S. Census LEHD classifies job types using 2-digit NAICS codes to represent
 
 - **Healthcare, Education, and Government**: 61 (Educational Services), 62 (Health Care), 81 (Other Services - largely Religious, Grantmaking, Civic, Professional, and Similar Organizations)
 
-- **Retail, Hospitality, and Other Services**: 44-45 (Retail Trade), 56 (Administrative and Support Services), 71 (Arts, Entertainment, and Recreation - largely Amusement, Gambling, and Recreation), 72 (Accomodation and Food Services)
+- **Retail, Hospitality, and Other Services**: 44-45 (Retail Trade), 56 (Administrative and Support Services), 71 (Arts, Entertainment, and Recreation), 72 (Accommodation and Food Services)
 
 For each of the above super categories, I calculated the location quotient for the years 2002 and 2015 (the extent of the LEHD WAC data available at the time of performing this analysis) at the census tract level. The difference between the 2015 and 2002 location quotients provides an indicator for how much a job sector grew or declined for a given geographic area.
 
 A _Location Quotient_ is a type of economic geography analysis that measures the relative concentration of a given industry in a given place. For this jobs analysis it means comparing the percentage of each super category at the census tract to the percentage of that same category at the nine county SF Bay Area regional level. For example, if a census tract contains 30% Manufacturing and Logistics jobs out of all job types, and the entire SF Bay Area contains 15%, then the location quotient would be determined by dividing the census tract percentage by the regional percentage. In this case the location quotient value would be 2, indicating a higher concentration of jobs in the Manufacturing and Logistics category then the SF Bay Area region as a whole. If that value were closer to 1, it would mean the census tract had about the same percentage of jobs as the region, if it were less then 1 then it would mean the census tract has fewer jobs then the region.
 
-One problem with a location quotient analysis is that it does not take into account the density of the variable being analyzed. When visualizing census tract location quotient, one would not be able to distinguish tracts with relatively few jobs in them from tracts with a high concentration of jobs. To correct for this problem, I calculated the job density for each census tract (number of total jobs divided by number of square miles) and then binned tracts into quintiles based on the density values. In the output maps, the tracts in the lowest quintile have their opacity reduced to 20% so that they are de-emphasized.
+One problem with a location quotient analysis is that it does not take into account the density of the variable being analyzed. When visualizing the location quotient at the census tract level, one would not be able to distinguish tracts with relatively few jobs in them from tracts with a high concentration of jobs. To correct for this problem, I calculated the job density for each census tract (number of total jobs divided by number of square miles) and then binned tracts into quintiles based on the density values. In the output maps, the tracts in the lowest quintile have their opacity reduced to 20% so that they are de-emphasized.
 
 Following the analysis I used [Observable](https://beta.observablehq.com/) notebooks and [D3JS](https://d3js.org/) to create choropleth maps for each category and separately for job density at the census tract level. Each map was exported as an SVG file from the browser and touched up using the vector editing software Adobe Illustrator in order to prepare them for print. This primarily meant resizing / cropping the map area, repositioning of labels, and conversion of the maps from SVG to PDF. Nine maps in total were created; one map showing job density of all jobs, and two maps for each super category; one showing the difference in location quotient from 2015 – 2002, and one showing the 2015 location quotient.
 
@@ -42,9 +42,11 @@ and legend:
 
 ![maker-lq-2015-legend](img/maker-lq-2015-legend.png)
 
-[Color Brewer](http://colorbrewer2.org/) and [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic) were used for determining the color values for each map's color ramp. I took Color Brewer's advice to limit each classification scheme to five classes so that they would be optimized for print. In the case of the 2015 LQ, there are only 4 classes as I dropped the bottom most / darkest color.
+[Color Brewer](http://colorbrewer2.org/) and [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic) were used for determining the color values for each map's color ramp. As the output maps for this project are initially intended for print, I took Color Brewer's advice to limit each classification scheme to five classes. In the case of the 2015 LQ, there are only 4 classes as I dropped the bottom class / darkest color.
 
-In addition to the nine choropleth maps, I created a stacked bar chart showing the overall trend in the four super categories for each year from 2002 to 2015. This chart is intended to provide context into how these categories have changed in the Bay Area over time. The notable changes are that jobs in the "Manufacturing and Logistics" category dropped by 5%, "Retail, Hospitality, and Other Services" remained constant, "Professional Services" grew by 2%, and "Healthcare, Education, and Government" grew by 3%.
+In addition to the nine choropleth maps, I created a stacked bar chart showing the overall trend in the four super categories for each year from 2002 to 2015. This chart is intended to provide context into how these categories have changed in the Bay Area over time. The notable changes are that jobs in the "Manufacturing and Logistics" category _decreased_ by 5.44%, "Retail, Hospitality, and Other Services" increased by 17.88%, "Professional Services" grew by 23.38%, and "Healthcare, Education, and Government" grew by 32.7%.
+
+For documentation on the data processing see the Jupyter notebooks in the `notebooks` directory.
 
 ## Data Processing
 Running `make` will download data from the U.S. Census and other sources for basemap data processing, then perform the location quotient analysis and basemap data processing. Prior to running `make` you will need to have `miniconda3` installed and a virtual environment created as outlined below in Environment Setup.
@@ -65,11 +67,11 @@ Then hand edit the `bay_area_clip.shp` file in QGIS using the "Node Tool", "Spli
 Finally, convert the linestring geometry back into a polygon for use with clipping osm roads and railways using QGIS (Vector > Geometry Tools > Lines to Polygons).
 
 ## Notebooks
-I used both Jupyter and Observable notebooks for this project, see the `notebooks/` directory for the related files.
+I used both Jupyter and Observable notebooks for this project, the former for data exploration and analysis and the latter for visualization. See the `notebooks/` directory for the related files.
 
 Data analysis was done using `python3`, `pandas`, `geopandas`, and `jupyter`. See the `.ipynb` files for data analysis and transformation procedures. These notebooks may be viewed by running `jupyter notebook` in the root directory of this repository and then navigating to the `notebooks/` directory in the Jupyter dashboard.
 
-The maps were created using Observable Notebooks, a web browser based Javascript notebook format, and may be viewed on beta.observablehq.com. I've archived them in the `notebooks` directory, but need to add a script to run these notebooks locally.
+The maps were created using Observable Notebooks, a web browser based Javascript notebook format, and may be viewed on [beta.observablehq.com/@clhenrick](https://beta.observablehq.com/@clhenrick). I've archived them in the `notebooks` directory, but need to add a script to run these notebooks locally.
 
 ## Environment Setup
 For using Python Pandas and GeoPandas for data processing.
