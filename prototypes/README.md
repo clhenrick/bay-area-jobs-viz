@@ -27,4 +27,6 @@ To view examples run an HTTP server in this directory such as `python -m http.se
 
 - [12: Stacked Bar Chart of Regional Change 2002 – 2015](./12)
 
-- [13: Bar Chart of Category LQ 2015 by County](./13)
+- [13: Bar Chart of Category Counts by County for 2015](./13)
+
+- [14: Bar Chart of Change in Category Counts by County from 2015 – 2002](./14)
