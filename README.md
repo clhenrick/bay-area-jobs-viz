@@ -1,6 +1,8 @@
 # SF Bay Area Jobs Viz
 Visualizing the change in job types within the San Francisco Bay Area from 2002 – 2015 through a *Location Quotient* analysis of U.S. Census' [Longitudinal Employer-Household Dynamics – Origin-Destination Employment Statistics – Workplace Area Characteristics data](https://lehd.ces.census.gov/data/).
 
+![map of maker job change lq 2015 – 2002](img/maker-change.jpg)
+
 ## Analysis
 The U.S. Census LEHD classifies job types using 2-digit NAICS codes to represent the primary industry of the employing company. Rather then analyze each category individually I aggregated them into four "super categories" listed below, similar to Robert Manduca's analysis for his [Job Dot Map](http://www.robertmanduca.com/projects/jobs.html).
 
