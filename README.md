@@ -135,3 +135,7 @@ source deactivate
 - NHGIS, for providing census tract geometry data: Steven Manson, Jonathan Schroeder, David Van Riper, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 12.0 [Database]. Minneapolis: University of Minnesota. 2017. http://doi.org/10.18128/D050.V12.0
 
 - [OpenStreetMap](https://www.openstreetmap.org/) Contributors for basemap data used in the printed maps.
+
+## License
+
+The content of this project itself is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International license](http://creativecommons.org/licenses/by-nc/4.0/), and the underlying source code used to format and display that content is licensed under the [MIT license](LICENSE.md).
