@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.axis path {
+  display: none;
+}
+
+text {
+  fill: #000;
+}
+
+text.label {
+  font-family: sans-serif;
+  font-size: 12px;
+}
+
+</style>
+<svg width="960" height="500"></svg>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script>
+const defaultCategory = "prof" // current selected category from dropdown element
+const categories = [
+  {
+    label: "makers",
+    value: "make"
+  },
+  {
+    label: "services",
+    value: "serv"
+  },
+  {
+    label: "professions",
+    value: "prof"
+  },
+  {
+    label: "support",
+    value: "supp"
+  }
+]
+const dispatcher = d3.dispatch("change")
+
+let labelText = "Number of ... jobs"
+
+var svg = d3.select("svg"),
+    margin = {top: 20, right: 20, bottom: 50, left: 80},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var x = d3.scaleLinear()
+    .rangeRound([0, width])
+    .nice()
+
+var y = d3.scaleBand()
+    .rangeRound([height, 0])
+    .padding(0.1)
+    .align(0.1);
+
+var z = d3.scaleOrdinal(d3.schemePastel1)
+  .domain(categories.map(d => d.value))
+
+var xAxis = d3.axisBottom(x)
+  .tickValues(d3.range(0, 260001, 20000))
+
+var yAxis = d3.axisLeft(y)
+
+function renderDropdown() {
+  dropdown = d3.select("body")
+    .append("select")
+
+  const options = dropdown.selectAll("options")
+    .data(categories)
+    .enter()
+    .append("option")
+    .attr("value", d => d.value)
+    .html(d => d.label)
+
+  options.each(function(option) {
+    const selection = d3.select(this)
+    selection.datum(option)
+
+    if (option.value === defaultCategory) {
+      selection.attr("selected", true)
+    }
+  })
+
+  dropdown.on("change", function() {
+    const value = d3.select(this).property("value")
+    dispatcher.call("change", this, value)
+  })
+}
+
+function main(error, data) {
+  if (error) throw error;
+  console.log(data)
+
+  // y domain remains constant
+  y.domain(data.map(d => d.county).sort().reverse())
+
+  // set up and draw y axis
+  g.append("g")
+    .classed("axis axis--y", true)
+    .call(yAxis)
+
+  // set up x axis
+  g.append("g")
+      .classed("axis axis--x", true)
+      .attr("transform", `translate(0, ${height})`)
+    .append("text")
+      .classed("label", true)
+      .attr("x", width / 2)
+      .attr("dy", "0.7em")
+      .attr("y", 25)
+      .attr("text-anchor", "middle")
+      .text(labelText)
+
+
+  function update(category) {
+    const filtered = data.map(d => d[`${category}_2015`])
+    const max = d3.max(filtered)
+    x.domain([0, max * 1.10])
+
+    g.select(".axis.axis--x")
+      .call(xAxis)
+
+    // update x axis label
+    g.select("text.label")
+      .text(labelText.replace("...", categories.find(d => d.value === category).label))
+
+    const bars = g.selectAll(".bar")
+        .data(data, d => d.county)
+
+    const barsUpdate = bars
+      .enter().append("rect")
+      .classed("bar", true)
+      .merge(bars)
+
+    barsUpdate
+      .transition().duration(300)
+      .attr("x", d => 0) // x(d[`${category}_2015`])
+      .attr("y", d => y(d.county))
+      .attr("width", d => x(d[`${category}_2015`]) - x(0))
+      .attr("height", y.bandwidth())
+      .attr("fill", z(category))
+  }
+
+  // whenver the dropdown changes, update the chart
+  dispatcher.on("change.update", update)
+
+  // initial render
+  dispatcher.call("change", null, defaultCategory)
+}
+
+// coerce strings to numbers
+function type(d) {
+  return {
+    county: d.ctyname,
+    make_change: +d.maker_change,
+    prof_change: +d.prof_change,
+    serv_change: +d.services_change,
+    supp_change: +d.support_change,
+    make_2015: +d.makers_2015,
+    prof_2015: +d.professions_2015,
+    serv_2015: +d.services_2015,
+    supp_2015: +d.support_2015,
+    total_2015: +d.total_2015
+  }
+}
+
+// first render the UI
+renderDropdown()
+
+// load & parse data, render chart
+d3.csv("../data/county_level_change.csv", type, main);
+
+</script>
