@@ -148,7 +148,9 @@ function main(error, data) {
     const filtered = data.map(d => d[key])
     const min = d3.min(filtered)
     const max = d3.max(filtered)
-    x.domain([Math.min(0, min * 1.05), max * 1.1])
+    const minPadding = category === "prof" ? 5 : 1.05
+    const maxPadding = 1.1
+    x.domain([Math.min(0, min * minPadding), max * maxPadding])
 
     const bars = barsGroup.selectAll(".bar")
         .data(data, d => d.county)
