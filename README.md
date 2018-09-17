@@ -3,6 +3,16 @@ Visualizing the change in job types within the San Francisco Bay Area from 2002 
 
 ![map of maker job change lq 2015 – 2002](img/maker-change.jpg)
 
+## Contents
+
+See the `viz` directory for Adobe Illustrator and PDF files for all maps and charts.
+
+For documentation on the data processing see the Jupyter notebooks in the `notebooks` directory.
+
+The `protoypes` directory contains experiments and prototypes for the final output visualization. It has its own readme file.
+
+The two python scripts are used to process the LEHD WAC data. See the [Data Processing](#data-processing) section for more.
+
 ## Analysis
 The U.S. Census LEHD classifies job types using 2-digit NAICS codes to represent the primary industry of the employing company. Rather then analyze each category individually I aggregated them into four "super categories" listed below, similar to Robert Manduca's analysis for his [Job Dot Map](http://www.robertmanduca.com/projects/jobs.html).
 
@@ -46,9 +56,7 @@ and legend:
 
 [Color Brewer](http://colorbrewer2.org/) and [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic) were used for determining the color values for each map's color ramp. As the output maps for this project are initially intended for print, I took Color Brewer's advice to limit each classification scheme to five classes. In the case of the 2015 LQ, there are only 4 classes as I dropped the bottom class / darkest color.
 
-In addition to the nine choropleth maps, I created a stacked bar chart showing the overall trend in the four super categories for each year from 2002 to 2015. This chart is intended to provide context into how these categories have changed in the Bay Area over time. The notable changes are that jobs in the "Manufacturing and Logistics" category _decreased_ by 5.44%, "Retail, Hospitality, and Other Services" increased by 17.88%, "Professional Services" grew by 23.38%, and "Healthcare, Education, and Government" grew by 32.7%.
-
-For documentation on the data processing see the Jupyter notebooks in the `notebooks` directory.
+In addition to the nine choropleth maps I created 9 bar charts that are intended to provide context into how these categories have changed at the county and region levels. A stacked bar chart shows the overall trend for the entire SF Bay Area in the four super categories for each year from 2002 to 2015. The notable changes are that jobs in the "Manufacturing and Logistics" category _decreased_ by 5.44%, "Retail, Hospitality, and Other Services" increased by 17.88%, "Professional Services" grew by 23.38%, and "Healthcare, Education, and Government" grew by 32.7%. Additionally for each of the four super categories there are two bar charts, one showing the number of jobs by county, and a second showing the change in number of jobs from 2002 – 2015.
 
 ## Data Processing
 Running `make` will download data from the U.S. Census and other sources for basemap data processing, then perform the location quotient analysis and basemap data processing. Prior to running `make` you will need to have `miniconda3` installed and a virtual environment created as outlined below in Environment Setup.
