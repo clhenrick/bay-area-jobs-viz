@@ -1,10 +1,10 @@
 # SF Bay Area Jobs Viz
-Visualizing the change in job types within the San Francisco Bay Area from 2002 – 2015 through a *Location Quotient* analysis of U.S. Census' [Longitudinal Employer-Household Dynamics – Origin-Destination Employment Statistics – Workplace Area Characteristics data](https://lehd.ces.census.gov/data/).
+Visualizing the change in job types within the San Francisco Bay Area from 2002 – 2015 through a Location Quotient analysis of U.S. Census' [Longitudinal Employer-Household Dynamics – Origin-Destination Employment Statistics – Workplace Area Characteristics data](https://lehd.ces.census.gov/data/).
 
 ![map of maker job change lq 2015 – 2002](img/maker-change.jpg)
+_A sample map showing change in manufacturing and logistics jobs, see `viz/pdf` for all maps and charts_
 
 ## Contents
-
 See the `viz` directory for Adobe Illustrator and PDF files for all maps and charts.
 
 For documentation on the data processing see the Jupyter notebooks in the `notebooks` directory.
