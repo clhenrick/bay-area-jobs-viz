@@ -59,20 +59,35 @@ data:
 .PHONY: all clean clean_processed clean_basemap data
 
 fetch_wac_files: data
-	wget -i wac_list.txt -P $(wacdir)
+	wget \
+		--no-use-server-timestamps \
+		-i wac_list.txt \
+		-P $(wacdir)
 
 fetch_nhgis_us_tract_2010: data
-	wget -O $(tractsdir)/$(nhgistracts) https://www.dropbox.com/s/cjk8bnh2xd9o8p7/nhgis0004_shapefile_tl2010_us_tract_2010.zip?dl=1
+	wget \
+		--no-use-server-timestamps \
+		-O $(tractsdir)/$(nhgistracts) \
+		https://www.dropbox.com/s/cjk8bnh2xd9o8p7/nhgis0004_shapefile_tl2010_us_tract_2010.zip?dl=1
 
 fetch_osm_sf_bay_area: data
-	wget https://s3.amazonaws.com/metro-extracts.nextzen.org/$(osmzip) -P $(osmdir)
+	wget \
+		--no-use-server-timestamps \
+		https://s3.amazonaws.com/metro-extracts.nextzen.org/$(osmzip) \
+		-P $(osmdir)
 
 fetch_sf_bay_counties: data
-	wget http://spatial.lib.berkeley.edu/public/ark28722-s7hs4j/data.zip -P $(countydir)
+	wget \
+		--no-use-server-timestamps \
+		http://spatial.lib.berkeley.edu/public/ark28722-s7hs4j/data.zip \
+		-P $(countydir)
 
 fetch_sf_bay_clip: data
 	cd $(basemapdir); \
-	wget -O $(sfbayclip).zip https://www.dropbox.com/s/jathq6xnw1mhth4/bay_area_clip.zip?dl=1; \
+	wget \
+		--no-use-server-timestamps \
+		-O $(sfbayclip).zip \
+		https://www.dropbox.com/s/jathq6xnw1mhth4/bay_area_clip.zip?dl=1; \
 	unzip $(sfbayclip).zip
 
 # creates a shapefile in wgs84 of census tracts for the 9 county SF Bay Area
