@@ -1,219 +1,218 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <style>
+  .axis path,
+  .gridlines path {
+    display: none;
+  }
 
-.axis path,
-.gridlines path {
-  display: none;
-}
+  text {
+    fill: #000;
+  }
 
-text {
-  fill: #000;
-}
-
-text.label {
-  font-family: sans-serif;
-  font-size: 12px;
-}
-
+  text.label {
+    font-family: sans-serif;
+    font-size: 12px;
+  }
 </style>
-<svg width="960" height="500"></svg>
+<svg width="480" height="306"></svg>
 <script src="//d3js.org/d3.v4.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script>
-const defaultCategory = "prof" // current selected category from dropdown element
-const categories = [
-  {
-    label: "makers",
-    value: "make"
-  },
-  {
-    label: "services",
-    value: "serv"
-  },
-  {
-    label: "professions",
-    value: "prof"
-  },
-  {
-    label: "support",
-    value: "supp"
-  }
-]
-const dispatcher = d3.dispatch("change")
+  const defaultCategory = "prof"; // current selected category from dropdown element
+  const categories = [
+    {
+      label: "makers",
+      value: "make",
+    },
+    {
+      label: "services",
+      value: "serv",
+    },
+    {
+      label: "professions",
+      value: "prof",
+    },
+    {
+      label: "support",
+      value: "supp",
+    },
+  ];
+  const dispatcher = d3.dispatch("change");
 
-let labelText = "Change in ... jobs 2002 – 2015"
+  let labelText = "Change in ... jobs 2002 – 2015";
 
-const t = d3.transition().duration(300)
+  const t = d3.transition().duration(300);
 
-var svg = d3.select("svg"),
-    margin = {top: 20, right: 20, bottom: 50, left: 80},
+  var svg = d3.select("svg"),
+    margin = { top: 20, right: 20, bottom: 50, left: 80 },
     width = +svg.attr("width") - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,
-    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    g = svg
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var x = d3.scaleLinear()
-    .rangeRound([0, width])
-    .nice()
+  var x = d3.scaleLinear().rangeRound([0, width]).nice();
 
-var y = d3.scaleBand()
-    .rangeRound([height, 0])
-    .padding(0.1)
-    .align(0.1);
+  var y = d3.scaleBand().rangeRound([height, 0]).padding(0.1).align(0.1);
 
-var z = d3.scaleOrdinal(d3.schemePastel1)
-  .domain(categories.map(d => d.value))
+  var z = d3
+    .scaleOrdinal(d3.schemePastel1)
+    .domain(categories.map((d) => d.value));
 
-var xAxis = d3.axisBottom(x)
-var yAxis = d3.axisLeft(y)
-var xAxisGrid = d3.axisBottom(x)
-  .tickSize(height)
-  .tickFormat("")
+  var xAxis = d3.axisBottom(x);
+  var yAxis = d3.axisLeft(y);
+  var xAxisGrid = d3.axisBottom(x).tickSize(height).tickFormat("");
 
-function renderDropdown() {
-  dropdown = d3.select("body")
-    .append("select")
+  function renderDropdown() {
+    dropdown = d3.select("body").append("select");
 
-  const options = dropdown.selectAll("options")
-    .data(categories)
-    .enter()
-    .append("option")
-    .attr("value", d => d.value)
-    .html(d => d.label)
+    const options = dropdown
+      .selectAll("options")
+      .data(categories)
+      .enter()
+      .append("option")
+      .attr("value", (d) => d.value)
+      .html((d) => d.label);
 
-  options.each(function(option) {
-    const selection = d3.select(this)
-    selection.datum(option)
+    options.each(function (option) {
+      const selection = d3.select(this);
+      selection.datum(option);
 
-    if (option.value === defaultCategory) {
-      selection.attr("selected", true)
-    }
-  })
+      if (option.value === defaultCategory) {
+        selection.attr("selected", true);
+      }
+    });
 
-  dropdown.on("change", function() {
-    const value = d3.select(this).property("value")
-    dispatcher.call("change", this, value)
-  })
-}
+    dropdown.on("change", function () {
+      const value = d3.select(this).property("value");
+      dispatcher.call("change", this, value);
+    });
+  }
 
-function main(error, data) {
-  if (error) throw error;
-  console.log(data)
+  function main(error, data) {
+    if (error) throw error;
+    console.log(data);
 
-  // y domain remains constant
-  y.domain(data.map(d => d.county).sort().reverse())
+    // y domain remains constant
+    y.domain(
+      data
+        .map((d) => d.county)
+        .sort()
+        .reverse()
+    );
 
-  // border
-  svg.append("rect")
+    // border
+    svg
+      .append("rect")
       .attr("id", "border")
       .attr("x", 0)
       .attr("y", 0)
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .attr("fill", "none")
-      .attr("stroke", "lightgrey")
+      .attr("stroke", "lightgrey");
 
-  // grid lines
-  const gridGroup = g.append("g")
+    // grid lines
+    const gridGroup = g
+      .append("g")
       .attr("id", "gridlines")
-      .classed("gridlines gridlines--x", true)
+      .classed("gridlines gridlines--x", true);
 
-  // group for drawing bars
-  const barsGroup = g.append("g")
+    // group for drawing bars
+    const barsGroup = g
+      .append("g")
       .attr("id", "bars-group")
-      .classed("bars", true)
+      .classed("bars", true);
 
-  // set up and draw y axis
-  const yAxisGroup = g.append("g")
+    // set up and draw y axis
+    const yAxisGroup = g
+      .append("g")
       .attr("id", "y-axis")
       .classed("axis axis--y", true)
-      .call(yAxis)
+      .call(yAxis);
 
-  // set up x axis
-  g.append("g")
+    // set up x axis
+    g.append("g")
       .classed("axis axis--x", true)
       .attr("id", "x-axis")
       .attr("transform", `translate(0, ${height})`)
-    .append("text")
+      .append("text")
       .classed("label", true)
       .attr("x", width / 2)
       .attr("dy", "0.7em")
       .attr("y", 25)
       .attr("text-anchor", "middle")
-      .text(labelText)
+      .text(labelText);
 
-  function update(category) {
-    const key = `${category}_change`
+    function update(category) {
+      const key = `${category}_change`;
 
-    const filtered = data.map(d => d[key])
-    const min = d3.min(filtered)
-    const max = d3.max(filtered)
-    const minPadding = category === "prof" ? 5 : 1.05
-    const maxPadding = 1.1
-    x.domain([Math.min(0, min * minPadding), max * maxPadding])
+      const filtered = data.map((d) => d[key]);
+      const min = d3.min(filtered);
+      const max = d3.max(filtered);
+      const minPadding = category === "prof" ? 5 : 1.05;
+      const maxPadding = 1.1;
+      x.domain([Math.min(0, min * minPadding), max * maxPadding]);
 
-    const bars = barsGroup.selectAll(".bar")
-        .data(data, d => d.county)
+      const bars = barsGroup.selectAll(".bar").data(data, (d) => d.county);
 
-    const barsUpdate = bars
-      .enter().append("rect")
-      .classed("bar", true)
-      .merge(bars)
+      const barsUpdate = bars
+        .enter()
+        .append("rect")
+        .classed("bar", true)
+        .merge(bars);
 
-    barsUpdate
-      .transition(t)
-      .attr("x", d => x(Math.min(0, d[key])))
-      .attr("y", d => y(d.county))
-      .attr("width", d => Math.abs(x(d[key]) - x(0)))
-      .attr("height", y.bandwidth())
-      .attr("fill", z(category))
+      barsUpdate
+        .transition(t)
+        .attr("x", (d) => x(Math.min(0, d[key])))
+        .attr("y", (d) => y(d.county))
+        .attr("width", (d) => Math.abs(x(d[key]) - x(0)))
+        .attr("height", y.bandwidth())
+        .attr("fill", z(category));
 
-    // update grid lines
-    gridGroup
-      .transition(t)
-      .call(xAxisGrid)
-      .select(".domain")
-      .remove()
+      // update grid lines
+      gridGroup.transition(t).call(xAxisGrid).select(".domain").remove();
 
-    gridGroup.selectAll("line")
-      .attr("stroke", "lightgrey")
+      gridGroup.selectAll("line").attr("stroke", "lightgrey");
 
-    g.select(".axis.axis--x")
-      .transition(t)
-      .call(xAxis)
+      g.select(".axis.axis--x").transition(t).call(xAxis);
 
-    // update x axis label
-    g.select("text.label")
-      .text(labelText.replace("...", categories.find(d => d.value === category).label))
+      // update x axis label
+      g.select("text.label").text(
+        labelText.replace(
+          "...",
+          categories.find((d) => d.value === category).label
+        )
+      );
+    }
+
+    // whenver the dropdown changes, update the chart
+    dispatcher.on("change.update", update);
+
+    // initial render
+    dispatcher.call("change", null, defaultCategory);
   }
 
-  // whenver the dropdown changes, update the chart
-  dispatcher.on("change.update", update)
-
-  // initial render
-  dispatcher.call("change", null, defaultCategory)
-}
-
-// coerce strings to numbers
-function type(d) {
-  return {
-    county: d.ctyname,
-    make_change: +d.maker_change,
-    prof_change: +d.prof_change,
-    serv_change: +d.services_change,
-    supp_change: +d.support_change,
-    make_2015: +d.makers_2015,
-    prof_2015: +d.professions_2015,
-    serv_2015: +d.services_2015,
-    supp_2015: +d.support_2015,
-    total_2015: +d.total_2015
+  // coerce strings to numbers
+  function type(d) {
+    return {
+      county: d.ctyname,
+      make_change: +d.maker_change,
+      prof_change: +d.prof_change,
+      serv_change: +d.services_change,
+      supp_change: +d.support_change,
+      make_2015: +d.makers_2015,
+      prof_2015: +d.professions_2015,
+      serv_2015: +d.services_2015,
+      supp_2015: +d.support_2015,
+      total_2015: +d.total_2015,
+    };
   }
-}
 
-// first render the UI
-renderDropdown()
+  // first render the UI
+  renderDropdown();
 
-// load & parse data, render chart
-d3.csv("../data/county_level_change.csv", type, main);
-
+  // load & parse data, render chart
+  d3.csv("../data/county_level_change.csv", type, main);
 </script>
