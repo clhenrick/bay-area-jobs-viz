@@ -17,6 +17,7 @@
 </style>
 <svg width="480" height="306"></svg>
 <script src="//d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-format.v1.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script>
   const defaultCategory = "prof"; // current selected category from dropdown element
@@ -60,7 +61,7 @@
     .scaleOrdinal(d3.schemePastel1)
     .domain(categories.map((d) => d.value));
 
-  var xAxis = d3.axisBottom(x);
+  var xAxis = d3.axisBottom(x).tickFormat(d3.format("~s"));
   var yAxis = d3.axisLeft(y);
   var xAxisGrid = d3.axisBottom(x).tickSize(height).tickFormat("");
 
